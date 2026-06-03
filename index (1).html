@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Morgan Lawn Services - Reliable lawn care services in Kokomo, Indiana. Lawn mowing, weed eating, mulch installation, leaf removal, and more. Get a free quote today!">
+<meta name="keywords" content="Kokomo lawn care, lawn mowing Kokomo Indiana, residential lawn care Kokomo, lawn service Kokomo IN, Morgan Lawn Services">
+<title>Morgan Lawn Services | Kokomo, Indiana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #1B5E20;
+    --green-mid: #2E7D32;
+    --green-bright: #4CAF50;
+    --green-light: #81C784;
+    --green-pale: #E8F5E9;
+    --white: #FFFFFF;
+    --charcoal: #333333;
+    --gray-mid: #666666;
+    --gray-light: #F5F5F5;
+    --gray-border: #E0E0E0;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 8px 32px rgba(0,0,0,0.12);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+    --radius: 12px;
+    --radius-lg: 20px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--charcoal);
+    background: var(--white);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-border);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; height: 70px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; color: var(--charcoal);
+    cursor: pointer;
+  }
+  .logo-svg { flex-shrink: 0; }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .logo-name {
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700;
+    color: var(--green-dark); letter-spacing: -0.02em;
+  }
+  .logo-tagline {
+    font-size: 0.6rem; font-weight: 500;
+    color: var(--gray-mid); letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex; align-items: center; gap: 4px; list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none; color: var(--charcoal);
+    font-weight: 500; font-size: 0.9rem;
+    padding: 8px 14px; border-radius: 8px;
+    transition: var(--transition); cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    background: var(--green-pale); color: var(--green-dark);
+  }
+  .nav-cta {
+    background: var(--green-dark) !important;
+    color: var(--white) !important;
+    padding: 9px 18px !important; border-radius: 8px !important;
+    font-weight: 600 !important;
+  }
+  .nav-cta:hover { background: var(--green-mid) !important; transform: translateY(-1px); }
+
+  .hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    cursor: pointer; padding: 4px; border: none; background: none;
+  }
+  .hamburger span {
+    width: 24px; height: 2px; background: var(--charcoal);
+    border-radius: 2px; transition: var(--transition);
+    display: block;
+  }
+  .mobile-menu {
+    display: none; position: fixed; top: 70px; left: 0; right: 0;
+    background: var(--white); border-bottom: 1px solid var(--gray-border);
+    box-shadow: var(--shadow-md); z-index: 999; padding: 16px;
+  }
+  .mobile-menu.open { display: block; }
+  .mobile-menu a {
+    display: block; padding: 12px 16px; text-decoration: none;
+    color: var(--charcoal); font-weight: 500; border-radius: 8px;
+    cursor: pointer; transition: var(--transition);
+  }
+  .mobile-menu a:hover { background: var(--green-pale); color: var(--green-dark); }
+  .mobile-menu a.nav-cta-mobile {
+    background: var(--green-dark); color: var(--white) !important;
+    text-align: center; margin-top: 8px;
+  }
+
+  /* ─── PAGES ─── */
+  .page { display: none; min-height: 100vh; padding-top: 70px; }
+  .page.active { display: block; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-body); font-weight: 600;
+    border: none; cursor: pointer; text-decoration: none;
+    border-radius: 10px; transition: var(--transition);
+    font-size: 0.95rem; letter-spacing: 0.01em;
+  }
+  .btn-primary {
+    background: var(--green-dark); color: var(--white);
+    padding: 14px 28px; box-shadow: 0 4px 16px rgba(27,94,32,0.3);
+  }
+  .btn-primary:hover { background: var(--green-mid); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(27,94,32,0.35); }
+  .btn-secondary {
+    background: var(--white); color: var(--green-dark);
+    padding: 14px 28px; border: 2px solid var(--green-dark);
+  }
+  .btn-secondary:hover { background: var(--green-pale); transform: translateY(-2px); }
+  .btn-sm { padding: 10px 20px; font-size: 0.875rem; }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative; min-height: calc(100vh - 70px);
+    display: flex; align-items: center;
+    background: linear-gradient(135deg, #0a2e0d 0%, #1B5E20 40%, #2E7D32 100%);
+    overflow: hidden;
+  }
+  .hero-bg-pattern {
+    position: absolute; inset: 0; opacity: 0.06;
+    background-image: repeating-linear-gradient(
+      45deg, #fff 0, #fff 1px, transparent 0, transparent 50%
+    );
+    background-size: 30px 30px;
+  }
+  .hero-blobs {
+    position: absolute; inset: 0; overflow: hidden;
+  }
+  .hero-blob {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle, rgba(76,175,80,0.25) 0%, transparent 70%);
+    animation: blobFloat 8s ease-in-out infinite;
+  }
+  .hero-blob:nth-child(1) { width: 600px; height: 600px; top: -200px; right: -100px; animation-delay: 0s; }
+  .hero-blob:nth-child(2) { width: 400px; height: 400px; bottom: -100px; left: -80px; animation-delay: 3s; }
+  .hero-blob:nth-child(3) { width: 300px; height: 300px; top: 30%; left: 40%; animation-delay: 5s; }
+  @keyframes blobFloat {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.05); }
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    max-width: 1200px; margin: 0 auto; padding: 60px 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  }
+  .hero-content { color: var(--white); }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px; padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 500; letter-spacing: 0.05em;
+    margin-bottom: 24px; color: var(--green-light);
+  }
+  .hero-badge::before { content: '●'; font-size: 0.5rem; }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 900; line-height: 1.1;
+    margin-bottom: 20px; letter-spacing: -0.02em;
+  }
+  .hero-title span { color: var(--green-light); }
+  .hero-sub {
+    font-size: 1.05rem; color: rgba(255,255,255,0.8);
+    line-height: 1.7; margin-bottom: 36px; max-width: 480px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-stats {
+    display: flex; gap: 32px; margin-top: 48px;
+    padding-top: 36px; border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .hero-stat-num {
+    font-family: var(--font-display); font-size: 2rem; font-weight: 900;
+    color: var(--white); line-height: 1;
+  }
+  .hero-stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .hero-visual {
+    display: flex; justify-content: center; align-items: center;
+  }
+  .hero-card {
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius-lg); padding: 36px;
+    color: var(--white); max-width: 340px; width: 100%;
+    animation: cardFloat 6s ease-in-out infinite;
+  }
+  @keyframes cardFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .hero-card-icon { font-size: 3rem; margin-bottom: 16px; }
+  .hero-card h3 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 12px; }
+  .hero-card p { font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.6; margin-bottom: 20px; }
+  .hero-service-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .hero-service-list li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.9rem; color: rgba(255,255,255,0.9);
+  }
+  .hero-service-list li::before {
+    content: '✓'; color: var(--green-bright);
+    font-weight: 700; font-size: 0.85rem;
+    width: 20px; height: 20px; background: rgba(76,175,80,0.2);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ─── SECTIONS ─── */
+  .section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+  .section-full { padding: 80px 20px; background: var(--gray-light); }
+  .section-full-inner { max-width: 1200px; margin: 0 auto; }
+  .section-full-green { padding: 80px 20px; background: var(--green-dark); }
+  .section-full-green-inner { max-width: 1200px; margin: 0 auto; }
+
+  .section-label {
+    display: inline-block; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--green-bright); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900; color: var(--charcoal); line-height: 1.15;
+    letter-spacing: -0.02em; margin-bottom: 16px;
+  }
+  .section-title-white { color: var(--white); }
+  .section-sub {
+    font-size: 1rem; color: var(--gray-mid); max-width: 560px; line-height: 1.7;
+  }
+  .section-sub-white { color: rgba(255,255,255,0.75); }
+  .section-header { margin-bottom: 56px; }
+  .section-header-center { text-align: center; }
+  .section-header-center .section-sub { margin: 0 auto; }
+
+  /* ─── SERVICES GRID ─── */
+  .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; }
+  .service-card {
+    background: var(--white); border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-border); padding: 36px 28px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition); cursor: default;
+    position: relative; overflow: hidden;
+  }
+  .service-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--green-dark), var(--green-bright));
+    transform: scaleX(0); transition: var(--transition); transform-origin: left;
+  }
+  .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--green-light); }
+  .service-card:hover::before { transform: scaleX(1); }
+  .service-icon {
+    width: 56px; height: 56px; background: var(--green-pale);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin-bottom: 20px;
+    transition: var(--transition);
+  }
+  .service-card:hover .service-icon { background: var(--green-dark); }
+  .service-card h3 {
+    font-family: var(--font-display); font-size: 1.25rem; font-weight: 700;
+    margin-bottom: 12px; color: var(--charcoal);
+  }
+  .service-card p { font-size: 0.9rem; color: var(--gray-mid); line-height: 1.65; }
+
+  /* ─── WHY CHOOSE ─── */
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+  .why-card {
+    text-align: center; padding: 40px 24px;
+    background: var(--white); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); border: 1px solid var(--gray-border);
+    transition: var(--transition);
+  }
+  .why-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .why-icon { font-size: 2.5rem; margin-bottom: 16px; }
+  .why-card h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 10px; }
+  .why-card p { font-size: 0.875rem; color: var(--gray-mid); line-height: 1.65; }
+
+  /* ─── REVIEWS ─── */
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .review-card {
+    background: var(--white); border-radius: var(--radius-lg);
+    padding: 32px 28px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-border); position: relative;
+    transition: var(--transition);
+  }
+  .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .review-card::before {
+    content: '"'; font-family: var(--font-display);
+    font-size: 5rem; color: var(--green-pale);
+    position: absolute; top: 10px; right: 24px; line-height: 1;
+  }
+  .stars { color: #FFC107; font-size: 1.1rem; margin-bottom: 14px; letter-spacing: 2px; }
+  .review-text { font-size: 0.9rem; line-height: 1.7; color: var(--charcoal); margin-bottom: 20px; font-style: italic; }
+  .reviewer { display: flex; align-items: center; gap: 12px; }
+  .reviewer-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-bright));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--white); font-weight: 700; font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .reviewer-name { font-weight: 600; font-size: 0.9rem; }
+  .reviewer-location { font-size: 0.78rem; color: var(--gray-mid); }
+
+  /* ─── CTA BAND ─── */
+  .cta-band {
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+    padding: 72px 20px; text-align: center; color: var(--white);
+    position: relative; overflow: hidden;
+  }
+  .cta-band::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      -45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px,
+      transparent 0, transparent 50%
+    );
+    background-size: 20px 20px;
+  }
+  .cta-band-inner { position: relative; max-width: 700px; margin: 0 auto; }
+  .cta-band h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; margin-bottom: 16px; }
+  .cta-band p { font-size: 1rem; color: rgba(255,255,255,0.8); margin-bottom: 36px; line-height: 1.7; }
+  .cta-band-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-white { background: var(--white); color: var(--green-dark); padding: 14px 28px; }
+  .btn-white:hover { background: var(--green-pale); transform: translateY(-2px); }
+  .btn-outline-white { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.5); padding: 14px 28px; }
+  .btn-outline-white:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+  /* ─── CONTACT FORM ─── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--charcoal); }
+  .form-group input, .form-group select, .form-group textarea {
+    font-family: var(--font-body); font-size: 0.9rem;
+    padding: 12px 16px; border: 1.5px solid var(--gray-border);
+    border-radius: 10px; outline: none; background: var(--white);
+    transition: var(--transition); color: var(--charcoal); width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--green-bright); box-shadow: 0 0 0 3px rgba(76,175,80,0.1);
+  }
+  .form-group textarea { resize: vertical; min-height: 120px; }
+  .form-success {
+    display: none; background: var(--green-pale); border: 1px solid var(--green-bright);
+    border-radius: 10px; padding: 16px 20px; color: var(--green-dark);
+    font-weight: 500; text-align: center; margin-top: 16px;
+  }
+
+  /* ─── PRICING ─── */
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .pricing-card {
+    background: var(--white); border-radius: var(--radius-lg);
+    border: 2px solid var(--gray-border); padding: 40px 32px;
+    text-align: center; transition: var(--transition); position: relative;
+  }
+  .pricing-card.featured {
+    border-color: var(--green-dark);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-8px);
+  }
+  .pricing-badge {
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--green-dark); color: var(--white);
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 4px 16px; border-radius: 100px;
+    text-transform: uppercase;
+  }
+  .pricing-card:hover { border-color: var(--green-bright); transform: translateY(-6px); box-shadow: var(--shadow-md); }
+  .pricing-card.featured:hover { transform: translateY(-12px); }
+  .pricing-icon { font-size: 2.5rem; margin-bottom: 16px; }
+  .pricing-tier { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 8px; }
+  .pricing-price { font-family: var(--font-display); font-size: 2.8rem; font-weight: 900; color: var(--green-dark); line-height: 1; }
+  .pricing-price span { font-size: 1.1rem; color: var(--gray-mid); font-family: var(--font-body); font-weight: 400; }
+  .pricing-desc { font-size: 0.875rem; color: var(--gray-mid); margin: 12px 0 24px; line-height: 1.6; }
+  .pricing-features { list-style: none; text-align: left; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+  .pricing-features li {
+    font-size: 0.875rem; color: var(--charcoal); display: flex; align-items: center; gap: 10px;
+  }
+  .pricing-features li::before {
+    content: '✓'; color: var(--green-bright); font-weight: 700;
+    width: 18px; height: 18px; background: var(--green-pale); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem;
+  }
+
+  /* ─── FAQ ─── */
+  .faq-list { display: flex; flex-direction: column; gap: 12px; max-width: 800px; margin: 0 auto; }
+  .faq-item {
+    background: var(--white); border: 1px solid var(--gray-border);
+    border-radius: var(--radius); overflow: hidden;
+    transition: var(--transition);
+  }
+  .faq-item:hover { border-color: var(--green-light); }
+  .faq-q {
+    padding: 20px 24px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    font-weight: 600; font-size: 0.95rem; color: var(--charcoal);
+    user-select: none;
+  }
+  .faq-q::after { content: '+'; font-size: 1.4rem; color: var(--green-dark); flex-shrink: 0; transition: var(--transition); }
+  .faq-item.open .faq-q::after { content: '−'; }
+  .faq-a { display: none; padding: 0 24px 20px; font-size: 0.9rem; color: var(--gray-mid); line-height: 1.7; border-top: 1px solid var(--gray-border); padding-top: 16px; }
+  .faq-item.open .faq-a { display: block; }
+
+  /* ─── GALLERY ─── */
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .gallery-item {
+    border-radius: var(--radius-lg); overflow: hidden;
+    aspect-ratio: 4/3; position: relative;
+    cursor: pointer; transition: var(--transition);
+  }
+  .gallery-item:hover { transform: scale(1.02); box-shadow: var(--shadow-lg); }
+  .gallery-visual {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: var(--transition);
+  }
+  .gallery-item:hover .gallery-visual { transform: scale(1.05); }
+  .gallery-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    color: var(--white); padding: 20px 16px 14px;
+    font-weight: 600; font-size: 0.9rem;
+  }
+  .gallery-tag {
+    display: inline-block; font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: rgba(76,175,80,0.9); border-radius: 100px;
+    padding: 3px 10px; margin-bottom: 4px;
+  }
+
+  /* ─── SERVICE AREA ─── */
+  .map-container {
+    border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: var(--shadow-md); border: 1px solid var(--gray-border);
+    height: 380px; background: var(--green-pale);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px; text-align: center; padding: 24px;
+  }
+  .map-placeholder-icon { font-size: 3.5rem; }
+  .area-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .area-tag {
+    background: var(--green-pale); color: var(--green-dark);
+    border: 1px solid var(--green-light); border-radius: 100px;
+    padding: 6px 16px; font-size: 0.85rem; font-weight: 500;
+  }
+
+  /* ─── ABOUT ─── */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .about-visual {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-bright));
+    border-radius: var(--radius-lg); padding: 48px 36px;
+    color: var(--white); position: relative; overflow: hidden;
+  }
+  .about-visual::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .about-big-letter {
+    font-family: var(--font-display); font-size: 8rem; font-weight: 900;
+    color: rgba(255,255,255,0.12); line-height: 1; margin-bottom: -20px;
+  }
+  .about-values { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; }
+  .about-value { display: flex; align-items: center; gap: 12px; font-size: 0.95rem; }
+  .about-value-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green-light); flex-shrink: 0;
+  }
+  .about-content p { font-size: 0.95rem; color: var(--gray-mid); line-height: 1.8; margin-bottom: 16px; }
+  .value-pills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .value-pill {
+    background: var(--green-pale); color: var(--green-dark);
+    border-radius: 100px; padding: 6px 16px;
+    font-size: 0.83rem; font-weight: 600;
+    border: 1px solid rgba(27,94,32,0.15);
+  }
+
+  /* ─── CONTACT PAGE ─── */
+  .contact-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; align-items: start; }
+  .contact-info { display: flex; flex-direction: column; gap: 24px; }
+  .contact-info-card {
+    background: var(--white); border: 1px solid var(--gray-border);
+    border-radius: var(--radius); padding: 24px;
+    display: flex; gap: 16px; align-items: flex-start;
+    box-shadow: var(--shadow-sm); transition: var(--transition);
+  }
+  .contact-info-card:hover { border-color: var(--green-light); box-shadow: var(--shadow-md); }
+  .contact-info-icon {
+    width: 44px; height: 44px; background: var(--green-pale);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .contact-info-card h4 { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+  .contact-info-card p, .contact-info-card a { font-size: 0.875rem; color: var(--gray-mid); text-decoration: none; line-height: 1.6; }
+  .contact-info-card a:hover { color: var(--green-dark); }
+  .social-links { display: flex; gap: 12px; margin-top: 8px; }
+  .social-link {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--green-pale); color: var(--green-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; text-decoration: none; transition: var(--transition);
+    font-weight: 700;
+  }
+  .social-link:hover { background: var(--green-dark); color: var(--white); transform: translateY(-2px); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--charcoal); color: rgba(255,255,255,0.75);
+    padding: 60px 20px 28px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+  .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 0.875rem; line-height: 1.7; margin-top: 14px; max-width: 260px; }
+  .footer-col h4 { color: var(--white); font-weight: 600; margin-bottom: 16px; font-size: 0.9rem; }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul li a {
+    font-size: 0.875rem; color: rgba(255,255,255,0.6);
+    text-decoration: none; cursor: pointer; transition: var(--transition);
+  }
+  .footer-col ul li a:hover { color: var(--green-light); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.8rem; color: rgba(255,255,255,0.4);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-bottom span { color: var(--green-light); }
+
+  /* ─── PAGE HEADERS ─── */
+  .page-header {
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
+    padding: 64px 20px; text-align: center; color: var(--white);
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px,
+      transparent 0, transparent 50%
+    );
+    background-size: 24px 24px;
+  }
+  .page-header-inner { position: relative; }
+  .page-header h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 12px; }
+  .page-header p { font-size: 1rem; color: rgba(255,255,255,0.75); max-width: 560px; margin: 0 auto; }
+  .breadcrumb {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; color: rgba(255,255,255,0.6);
+    margin-bottom: 16px;
+  }
+  .breadcrumb span { color: var(--green-light); cursor: pointer; }
+  .breadcrumb span:hover { text-decoration: underline; }
+
+  /* ─── SERVICE DETAIL CARDS (services page) ─── */
+  .service-detail {
+    background: var(--white); border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-border); overflow: hidden;
+    box-shadow: var(--shadow-sm); display: grid;
+    grid-template-columns: 1fr 2fr; margin-bottom: 28px;
+    transition: var(--transition);
+  }
+  .service-detail:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+  .service-detail-visual {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 24px; text-align: center;
+    background: linear-gradient(135deg, var(--green-pale), #c8e6c9);
+  }
+  .service-detail-visual .big-icon { font-size: 3.5rem; margin-bottom: 12px; }
+  .service-detail-visual h3 { font-family: var(--font-display); font-size: 1.2rem; color: var(--green-dark); }
+  .service-detail-content { padding: 36px; }
+  .service-detail-content p { font-size: 0.9rem; color: var(--gray-mid); line-height: 1.7; margin-bottom: 16px; }
+  .benefit-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .benefit-list li {
+    font-size: 0.875rem; color: var(--charcoal);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .benefit-list li::before {
+    content: '→'; color: var(--green-bright); font-weight: 700; flex-shrink: 0;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeInUp 0.6s ease both; }
+  .fade-in-delay-1 { animation-delay: 0.1s; }
+  .fade-in-delay-2 { animation-delay: 0.2s; }
+  .fade-in-delay-3 { animation-delay: 0.3s; }
+  .fade-in-delay-4 { animation-delay: 0.4s; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero-visual { display: none; }
+    .about-grid { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .service-detail { grid-template-columns: 1fr; }
+    .service-detail-visual { padding: 28px; flex-direction: row; gap: 20px; justify-content: flex-start; }
+  }
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hero-stats { flex-wrap: wrap; gap: 20px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .pricing-card.featured { transform: none; }
+    .section, .section-full, .section-full-green { padding: 56px 16px; }
+    .section-full-inner, .section-full-green-inner { padding: 0; }
+  }
+
+  /* ─── LAWN SVG ILLUSTRATIONS ─── */
+  .lawn-illustration { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a class="logo" onclick="showPage('home')">
+      <!-- Logo SVG -->
+      <svg class="logo-svg" width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="44" height="44" rx="10" fill="#1B5E20"/>
+        <!-- Stylized M from grass blades -->
+        <g>
+          <!-- Left blade -->
+          <path d="M8 34 C8 34 9 20 11 14 C11.5 12 12.5 12 13 14 C14 18 14 26 14 34" fill="#4CAF50"/>
+          <!-- Center-left blade -->
+          <path d="M14 34 C14 34 15 22 17 16 C17.5 14 18 16 18.5 20 L19 34" fill="#81C784"/>
+          <!-- Peak left -->
+          <path d="M11 14 L15 21 L19 14" fill="#4CAF50"/>
+          <!-- Center peak -->
+          <path d="M19 20 L22 12 L25 20" fill="#4CAF50"/>
+          <!-- Center-right blade -->
+          <path d="M25 34 C25 34 25.5 22 26 20 C26.5 16 27 14 27.5 16 C29.5 22 30 34 30 34" fill="#81C784"/>
+          <!-- Right blade -->
+          <path d="M30 34 C30 34 30 26 31 14 C31.5 12 32.5 12 33 14 C35 20 36 34 36 34" fill="#4CAF50"/>
+          <!-- Peak right -->
+          <path d="M25 14 L29 21 L33 14" fill="#4CAF50"/>
+          <!-- Ground line -->
+          <rect x="6" y="33" width="32" height="3" rx="1.5" fill="#2E7D32"/>
+          <!-- Grass tufts -->
+          <ellipse cx="10" cy="33" rx="3" ry="1.5" fill="#4CAF50"/>
+          <ellipse cx="22" cy="33" rx="4" ry="1.5" fill="#4CAF50"/>
+          <ellipse cx="34" cy="33" rx="3" ry="1.5" fill="#4CAF50"/>
+        </g>
+      </svg>
+      <div class="logo-text">
+        <span class="logo-name">Morgan Lawn</span>
+        <span class="logo-tagline">Services · Kokomo, IN</span>
+      </div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a onclick="showPage('home')" data-page="home">Home</a></li>
+      <li><a onclick="showPage('services')" data-page="services">Services</a></li>
+      <li><a onclick="showPage('pricing')" data-page="pricing">Pricing</a></li>
+      <li><a onclick="showPage('about')" data-page="about">About</a></li>
+      <li><a onclick="showPage('gallery')" data-page="gallery">Gallery</a></li>
+      <li><a onclick="showPage('reviews')" data-page="reviews">Reviews</a></li>
+      <li><a onclick="showPage('faq')" data-page="faq">FAQ</a></li>
+      <li><a onclick="showPage('contact')" data-page="contact" class="nav-cta">Get a Quote</a></li>
+    </ul>
+
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="showPage('home'); toggleMenu()">Home</a>
+  <a onclick="showPage('services'); toggleMenu()">Services</a>
+  <a onclick="showPage('pricing'); toggleMenu()">Pricing</a>
+  <a onclick="showPage('about'); toggleMenu()">About</a>
+  <a onclick="showPage('gallery'); toggleMenu()">Gallery</a>
+  <a onclick="showPage('reviews'); toggleMenu()">Reviews</a>
+  <a onclick="showPage('faq'); toggleMenu()">FAQ</a>
+  <a onclick="showPage('contact'); toggleMenu()" class="nav-cta-mobile">Get a Free Quote</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ HOME PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-blobs">
+      <div class="hero-blob"></div>
+      <div class="hero-blob"></div>
+      <div class="hero-blob"></div>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge fade-in">Serving Kokomo &amp; Surrounding Areas</div>
+        <h1 class="hero-title fade-in fade-in-delay-1">
+          Reliable Lawn Care Services in <span>Kokomo, Indiana</span>
+        </h1>
+        <p class="hero-sub fade-in fade-in-delay-2">
+          Dependable, affordable lawn care with clear communication and professional results. Your neighbor in the lawn care business — built on honesty and hard work.
+        </p>
+        <div class="hero-actions fade-in fade-in-delay-3">
+          <button class="btn btn-primary" onclick="showPage('contact')">🌿 Get a Free Quote</button>
+          <button class="btn btn-outline-white" onclick="showPage('services')">View Services →</button>
+        </div>
+        <div class="hero-stats fade-in fade-in-delay-4">
+          <div>
+            <div class="hero-stat-num">100%</div>
+            <div class="hero-stat-label">Locally Owned</div>
+          </div>
+          <div>
+            <div class="hero-stat-num">5★</div>
+            <div class="hero-stat-label">Customer Rated</div>
+          </div>
+          <div>
+            <div class="hero-stat-num">Free</div>
+            <div class="hero-stat-label">Estimates Always</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual fade-in fade-in-delay-2">
+        <div class="hero-card">
+          <div class="hero-card-icon">🏡</div>
+          <h3>What We Offer</h3>
+          <p>Complete residential lawn care for Kokomo homeowners — done right, every time.</p>
+          <ul class="hero-service-list">
+            <li>Lawn Mowing &amp; Edging</li>
+            <li>Weed Eating / String Trimming</li>
+            <li>Mulch Installation</li>
+            <li>Leaf Removal</li>
+            <li>Weed Pulling</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED SERVICES -->
+  <div class="section">
+    <div class="section-header section-header-center">
+      <span class="section-label">What We Do</span>
+      <h2 class="section-title">Our Lawn Care Services</h2>
+      <p class="section-sub">Everything your lawn needs, handled professionally and affordably by a local owner-operator you can trust.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">🌿</div>
+        <h3>Lawn Mowing</h3>
+        <p>Regular, reliable mowing services to keep your lawn looking sharp. Consistent cuts at the right height for a healthy, beautiful yard.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">✂️</div>
+        <h3>Weed Eating & Trimming</h3>
+        <p>Precision string trimming around edges, fences, trees, and hard-to-reach areas that a mower can't get to.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🪨</div>
+        <h3>Mulch Installation</h3>
+        <p>Fresh mulch delivered and installed around beds and trees. Improves moisture retention, curb appeal, and weed control.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🍂</div>
+        <h3>Leaf Removal</h3>
+        <p>Thorough leaf cleanup in fall and beyond. We bag, blow, and remove leaves so your lawn can breathe and stay healthy.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">🌱</div>
+        <h3>Weed Pulling</h3>
+        <p>Manual weed removal from flower beds, walkways, and landscaping. Clean, hand-pulled weeds for a tidy, professional finish.</p>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:40px;">
+      <button class="btn btn-primary" onclick="showPage('services')">See All Service Details →</button>
+    </div>
+  </div>
+
+  <!-- WHY CHOOSE -->
+  <div class="section-full">
+    <div class="section-full-inner">
+      <div class="section-header section-header-center">
+        <span class="section-label">Why Morgan Lawn</span>
+        <h2 class="section-title">Built on Trust. Driven by Quality.</h2>
+        <p class="section-sub">We're not a giant franchise. We're your neighbor — and we treat your lawn like it's our own.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">🤝</div>
+          <h3>Honest &amp; Reliable</h3>
+          <p>We show up when we say we will. No surprises, no missed appointments, and always transparent pricing.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📱</div>
+          <h3>Clear Communication</h3>
+          <p>You'll always know what's happening with your lawn. Easy scheduling, prompt responses, and updates you can count on.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">💰</div>
+          <h3>Affordable Pricing</h3>
+          <p>Competitive rates without cutting corners. Quality work at prices that make sense for local Kokomo homeowners.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🏆</div>
+          <h3>Owner-Operated</h3>
+          <p>When you hire Morgan Lawn Services, the owner handles your property personally — that means more attention to detail.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📍</div>
+          <h3>Locally Rooted</h3>
+          <p>Based right here in Kokomo. We know the area, the neighborhoods, and we're invested in this community.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🌟</div>
+          <h3>Free Estimates</h3>
+          <p>No obligation, no pressure. We come look at your property and give you a clear, fair quote before any work begins.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS PREVIEW -->
+  <div class="section">
+    <div class="section-header section-header-center">
+      <span class="section-label">What Customers Say</span>
+      <h2 class="section-title">Kokomo Homeowners Love Us</h2>
+      <p class="section-sub">Don't just take our word for it — hear from the neighbors we've served.</p>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Best lawn service I've had in Kokomo. Always on time, great communication, and my yard looks amazing every single time. Highly recommend!</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">JT</div>
+          <div>
+            <div class="reviewer-name">James T.</div>
+            <div class="reviewer-location">Kokomo, IN</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Finally a lawn company that actually shows up! Fair prices, very professional, and he takes real pride in his work. My yard has never looked better.</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">SR</div>
+          <div>
+            <div class="reviewer-name">Sarah R.</div>
+            <div class="reviewer-location">Kokomo, IN</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Had mulch installed and the yard weeded — came out beautiful. Very affordable and the communication throughout was great. Will definitely use again!</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">DM</div>
+          <div>
+            <div class="reviewer-name">David M.</div>
+            <div class="reviewer-location">Kokomo, IN</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:40px;">
+      <button class="btn btn-secondary" onclick="showPage('reviews')">Read More Reviews</button>
+    </div>
+  </div>
+
+  <!-- SERVICE AREA -->
+  <div class="section-full">
+    <div class="section-full-inner">
+      <div class="section-header section-header-center">
+        <span class="section-label">Service Area</span>
+        <h2 class="section-title">Proudly Serving Kokomo &amp; Surrounding Communities</h2>
+      </div>
+      <div class="map-container">
+        <div class="map-placeholder-icon">📍</div>
+        <h3 style="font-family: var(--font-display); font-size:1.4rem; color:var(--green-dark);">Centered on Kokomo, Indiana</h3>
+        <p style="font-size:0.9rem; color:var(--gray-mid); max-width:480px; line-height:1.6;">We serve residential customers throughout Kokomo and the surrounding areas. Not sure if you're in our service area? Give us a call — we'll let you know!</p>
+        <div class="area-tags">
+          <span class="area-tag">📍 Kokomo</span>
+          <span class="area-tag">📍 Howard County</span>
+          <span class="area-tag">📍 Greentown</span>
+          <span class="area-tag">📍 Russiaville</span>
+          <span class="area-tag">📍 Bunker Hill</span>
+          <span class="area-tag">📍 Surrounding Areas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-band">
+    <div class="cta-band-inner">
+      <h2>Ready for a Lawn You'll Love?</h2>
+      <p>Get a free, no-obligation estimate today. We'll come look at your property and give you a clear, fair price — no pressure, no surprises.</p>
+      <div class="cta-band-actions">
+        <button class="btn btn-white" onclick="showPage('contact')">🌿 Get a Free Quote</button>
+        <button class="btn btn-outline-white" onclick="showPage('services')">View Services</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /home -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ SERVICES PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-services" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / Services</div>
+      <h1>Our Lawn Care Services</h1>
+      <p>Professional residential lawn care in Kokomo, Indiana. Every service delivered with reliability, care, and attention to detail.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <!-- Mowing -->
+    <div class="service-detail">
+      <div class="service-detail-visual">
+        <div class="big-icon">🌿</div>
+        <h3>Lawn Mowing</h3>
+      </div>
+      <div class="service-detail-content">
+        <p>A well-maintained lawn starts with consistent, professional mowing. We mow at the ideal height for your grass type, leaving clean, even cuts that promote healthy root growth and give your yard a sharp, manicured appearance.</p>
+        <p>Whether you need weekly, bi-weekly, or seasonal service, we work with your schedule and make sure your lawn looks its best all season long.</p>
+        <ul class="benefit-list">
+          <li>Consistent cut height for healthier turf</li>
+          <li>Clean clippings management</li>
+          <li>Edging along walkways and driveways</li>
+          <li>Flexible scheduling options</li>
+          <li>Reliable, punctual service every visit</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" onclick="showPage('contact')">Get a Mowing Quote →</button>
+      </div>
+    </div>
+
+    <!-- Weed Eating -->
+    <div class="service-detail">
+      <div class="service-detail-visual">
+        <div class="big-icon">✂️</div>
+        <h3>Weed Eating & Trimming</h3>
+      </div>
+      <div class="service-detail-content">
+        <p>Mowing only gets part of the job done. Our string trimming service reaches every corner, fence line, tree base, and border that a mower can't touch — giving your property a fully finished, professional look.</p>
+        <p>Included with most lawn mowing services, or available as a standalone visit for properties that need targeted attention.</p>
+        <ul class="benefit-list">
+          <li>Precision trimming along all edges</li>
+          <li>Around fences, trees, and garden beds</li>
+          <li>Curb and sidewalk detailing</li>
+          <li>Blowing debris from hard surfaces</li>
+          <li>Complements mowing for a complete finish</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" onclick="showPage('contact')">Get a Trimming Quote →</button>
+      </div>
+    </div>
+
+    <!-- Mulch -->
+    <div class="service-detail">
+      <div class="service-detail-visual">
+        <div class="big-icon">🪨</div>
+        <h3>Mulch Installation</h3>
+      </div>
+      <div class="service-detail-content">
+        <p>Fresh mulch does more than just look great — it protects your plants, retains moisture, regulates soil temperature, and naturally suppresses weed growth. We deliver and professionally install quality mulch in all your flower beds, landscaping areas, and around trees.</p>
+        <p>We handle everything from clearing old mulch to installing a fresh, clean layer at the right depth for maximum benefit.</p>
+        <ul class="benefit-list">
+          <li>Dramatically improves curb appeal</li>
+          <li>Reduces watering needs by retaining moisture</li>
+          <li>Natural weed suppression</li>
+          <li>Protects plant roots from temperature extremes</li>
+          <li>Multiple mulch types available</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" onclick="showPage('contact')">Get a Mulch Quote →</button>
+      </div>
+    </div>
+
+    <!-- Leaf Removal -->
+    <div class="service-detail">
+      <div class="service-detail-visual">
+        <div class="big-icon">🍂</div>
+        <h3>Leaf Removal</h3>
+      </div>
+      <div class="service-detail-content">
+        <p>Left on your lawn, thick layers of leaves can smother grass, promote disease, and create a haven for pests over the winter. Our thorough leaf removal service keeps your lawn healthy heading into the cold months — and looking great in the process.</p>
+        <p>We rake, blow, and bag all leaves and debris, leaving your property completely clean and ready for the season ahead.</p>
+        <ul class="benefit-list">
+          <li>Prevents lawn suffocation and disease</li>
+          <li>Complete cleanup — no leaving piles behind</li>
+          <li>Available for one-time or recurring seasonal service</li>
+          <li>Proper disposal or bagging included</li>
+          <li>Fast, efficient, and thorough</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" onclick="showPage('contact')">Get a Leaf Removal Quote →</button>
+      </div>
+    </div>
+
+    <!-- Weed Pulling -->
+    <div class="service-detail">
+      <div class="service-detail-visual">
+        <div class="big-icon">🌱</div>
+        <h3>Weed Pulling</h3>
+      </div>
+      <div class="service-detail-content">
+        <p>Weeds in your flower beds, garden borders, and walkways make even well-maintained lawns look unkempt. Our manual weed pulling service removes unwanted growth by the root, giving your landscape a clean, tidy, professional appearance.</p>
+        <p>Ideal for seasonal cleanups, new homeowners, or anyone who wants pristine beds without the back-breaking work.</p>
+        <ul class="benefit-list">
+          <li>Root-removal for longer-lasting results</li>
+          <li>Safe around flowers, plants, and shrubs</li>
+          <li>Flower beds, borders, and walkways</li>
+          <li>Can be paired with mulch installation</li>
+          <li>Attention to detail — every weed addressed</li>
+        </ul>
+        <button class="btn btn-primary btn-sm" onclick="showPage('contact')">Get a Weed Pulling Quote →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-band">
+    <div class="cta-band-inner">
+      <h2>Not Sure What Your Lawn Needs?</h2>
+      <p>Let us take a look — free of charge. We'll assess your property and recommend the right services for your specific situation.</p>
+      <div class="cta-band-actions">
+        <button class="btn btn-white" onclick="showPage('contact')">🌿 Request a Free Visit</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /services -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ PRICING PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-pricing" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / Pricing</div>
+      <h1>Transparent, Affordable Pricing</h1>
+      <p>No hidden fees. No surprises. Just honest pricing for quality lawn care in Kokomo, Indiana.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header section-header-center">
+      <span class="section-label">Lawn Mowing</span>
+      <h2 class="section-title">Mowing &amp; Maintenance Starting Prices</h2>
+      <p class="section-sub">Prices vary based on property size, terrain, and job complexity. All quotes are free and customized to your specific yard.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-icon">🏠</div>
+        <div class="pricing-tier">Small Yard</div>
+        <div class="pricing-price">$35<span>+/visit</span></div>
+        <p class="pricing-desc">Ideal for compact lots and smaller residential properties up to approx. ¼ acre.</p>
+        <ul class="pricing-features">
+          <li>Full lawn mowing</li>
+          <li>String trimming</li>
+          <li>Edging</li>
+          <li>Debris blowing</li>
+        </ul>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="showPage('contact')">Get a Quote</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-icon">🏡</div>
+        <div class="pricing-tier">Medium Yard</div>
+        <div class="pricing-price">$55<span>+/visit</span></div>
+        <p class="pricing-desc">For average residential lots between ¼ and ½ acre — the most common yard size in Kokomo.</p>
+        <ul class="pricing-features">
+          <li>Full lawn mowing</li>
+          <li>String trimming</li>
+          <li>Edging all borders</li>
+          <li>Debris blowing</li>
+          <li>Standard cleanup</li>
+        </ul>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="showPage('contact')">Get a Quote</button>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-icon">🏘️</div>
+        <div class="pricing-tier">Large Yard</div>
+        <div class="pricing-price">$80<span>+/visit</span></div>
+        <p class="pricing-desc">For larger lots over ½ acre with more ground to cover and additional trimming.</p>
+        <ul class="pricing-features">
+          <li>Full lawn mowing</li>
+          <li>Extensive trimming</li>
+          <li>Edging all surfaces</li>
+          <li>Complete debris blowing</li>
+          <li>Priority scheduling</li>
+        </ul>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="showPage('contact')">Get a Quote</button>
+      </div>
+    </div>
+
+    <!-- Additional Services Pricing -->
+    <div style="margin-top: 64px;">
+      <div class="section-header section-header-center">
+        <span class="section-label">Additional Services</span>
+        <h2 class="section-title">Specialty Service Pricing</h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-icon">🪨</div>
+          <div class="pricing-tier">Mulch Installation</div>
+          <div class="pricing-price">$75<span>+/project</span></div>
+          <p class="pricing-desc">Mulch delivery and installation around beds, trees, and landscaped areas. Final price based on square footage and mulch type.</p>
+          <ul class="pricing-features">
+            <li>Old mulch clearing available</li>
+            <li>Fresh quality mulch installed</li>
+            <li>Proper 2–3" depth application</li>
+            <li>Edged and finished clean</li>
+          </ul>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="showPage('contact')">Get a Quote</button>
+        </div>
+        <div class="pricing-card">
+          <div class="pricing-icon">🍂</div>
+          <div class="pricing-tier">Leaf Removal</div>
+          <div class="pricing-price">$60<span>+/visit</span></div>
+          <p class="pricing-desc">Complete leaf cleanup and removal for small to large properties. Price depends on volume of leaves and lot size.</p>
+          <ul class="pricing-features">
+            <li>Full raking and blowing</li>
+            <li>Bagging and removal</li>
+            <li>Front &amp; back yard</li>
+            <li>One-time or seasonal service</li>
+          </ul>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="showPage('contact')">Get a Quote</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing Note -->
+    <div style="background:var(--green-pale); border:1px solid var(--green-light); border-radius:var(--radius-lg); padding:32px 36px; margin-top:48px; text-align:center;">
+      <div style="font-size:1.8rem; margin-bottom:12px;">📋</div>
+      <h3 style="font-family:var(--font-display); font-size:1.3rem; color:var(--green-dark); margin-bottom:10px;">Prices Are Starting Points — Your Quote Is Free</h3>
+      <p style="font-size:0.9rem; color:var(--gray-mid); max-width:580px; margin:0 auto; line-height:1.7;">Every property is different. Pricing depends on your lot size, terrain, obstacles, service frequency, and job complexity. All listed prices are starting estimates. We'll always give you an exact quote before any work begins — no surprises, ever.</p>
+      <button class="btn btn-primary" style="margin-top:24px;" onclick="showPage('contact')">Get My Custom Quote →</button>
+    </div>
+  </div>
+</div><!-- /pricing -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ ABOUT PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-about" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / About</div>
+      <h1>About Morgan Lawn Services</h1>
+      <p>A locally owned, owner-operated lawn care business built on hard work, honesty, and genuine care for the Kokomo community.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-big-letter">M</div>
+        <h2 style="font-family:var(--font-display); font-size:1.8rem; margin-bottom:12px;">Our Story</h2>
+        <p style="font-size:0.9rem; color:rgba(255,255,255,0.8); line-height:1.7; margin-bottom:24px;">Built from the ground up right here in Kokomo, Indiana — with a truck, a mower, and a commitment to doing the job right every single time.</p>
+        <div class="about-values">
+          <div class="about-value"><div class="about-value-dot"></div> Reliability you can count on</div>
+          <div class="about-value"><div class="about-value-dot"></div> Clear, honest communication</div>
+          <div class="about-value"><div class="about-value-dot"></div> Affordable, fair pricing</div>
+          <div class="about-value"><div class="about-value-dot"></div> Attention to every detail</div>
+          <div class="about-value"><div class="about-value-dot"></div> Pride in every property we touch</div>
+        </div>
+      </div>
+      <div class="about-content">
+        <p>Morgan Lawn Services was started with a simple mission: give Kokomo homeowners a lawn care company they can actually rely on. No missed appointments, no vague pricing, no strangers who don't care about your property. Just dependable, professional service from an owner who shows up and gets the job done right.</p>
+        <p>As an owner-operated business, every lawn we service gets the full attention of someone who genuinely takes pride in their work. When you hire Morgan Lawn Services, you're not getting a rotation of different crew members — you're getting the owner, personally invested in making your yard look its best.</p>
+        <p>We built this business on the values that matter most to homeowners: showing up on time, communicating clearly, charging fair prices, and delivering results you can see and be proud of. In a world where that kind of service is harder to find, we make it our standard.</p>
+        <p>Our vision extends beyond today. While we currently serve residential customers throughout the Kokomo area, we're building toward becoming a full-service lawn care and landscaping company — with the same community-first values that got us here, at every stage of growth.</p>
+        <div class="value-pills">
+          <span class="value-pill">🤝 Reliability</span>
+          <span class="value-pill">📞 Communication</span>
+          <span class="value-pill">💰 Affordability</span>
+          <span class="value-pill">🏆 Quality Work</span>
+          <span class="value-pill">📍 Local &amp; Trusted</span>
+          <span class="value-pill">🌱 Growing Together</span>
+        </div>
+        <div style="margin-top:36px; display:flex; gap:14px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="showPage('contact')">Get a Free Quote</button>
+          <button class="btn btn-secondary" onclick="showPage('services')">View Our Services</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Future Vision -->
+  <div class="section-full">
+    <div class="section-full-inner">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;">
+        <div>
+          <span class="section-label">Looking Ahead</span>
+          <h2 class="section-title">Built to Grow With Kokomo</h2>
+          <p class="section-sub" style="max-width:100%;">We started small on purpose — so we could get it right before getting bigger. As we grow, we're committed to never losing the personal touch and exceptional service quality that defines us today.</p>
+          <p style="font-size:0.9rem; color:var(--gray-mid); line-height:1.7; margin-top:16px;">Our future plans include expanding into full landscaping services, commercial properties, and growing a team that shares our values. But one thing will never change: every customer will be treated like a neighbor, not a number.</p>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div style="background:var(--white); border-radius:var(--radius); padding:28px; text-align:center; box-shadow:var(--shadow-sm); border:1px solid var(--gray-border);">
+            <div style="font-size:2rem; margin-bottom:8px;">🏡</div>
+            <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700; color:var(--green-dark);">Residential</div>
+            <div style="font-size:0.8rem; color:var(--gray-mid); margin-top:4px;">Current Focus</div>
+          </div>
+          <div style="background:var(--white); border-radius:var(--radius); padding:28px; text-align:center; box-shadow:var(--shadow-sm); border:1px solid var(--gray-border);">
+            <div style="font-size:2rem; margin-bottom:8px;">🌳</div>
+            <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700; color:var(--green-dark);">Landscaping</div>
+            <div style="font-size:0.8rem; color:var(--gray-mid); margin-top:4px;">Coming Soon</div>
+          </div>
+          <div style="background:var(--white); border-radius:var(--radius); padding:28px; text-align:center; box-shadow:var(--shadow-sm); border:1px solid var(--gray-border);">
+            <div style="font-size:2rem; margin-bottom:8px;">🏢</div>
+            <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700; color:var(--green-dark);">Commercial</div>
+            <div style="font-size:0.8rem; color:var(--gray-mid); margin-top:4px;">Future Plans</div>
+          </div>
+          <div style="background:var(--green-dark); border-radius:var(--radius); padding:28px; text-align:center; box-shadow:var(--shadow-sm);">
+            <div style="font-size:2rem; margin-bottom:8px;">📍</div>
+            <div style="font-family:var(--font-display); font-size:1.1rem; font-weight:700; color:var(--white);">Kokomo First</div>
+            <div style="font-size:0.8rem; color:rgba(255,255,255,0.7); margin-top:4px;">Always &amp; Forever</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /about -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ GALLERY PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-gallery" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / Gallery</div>
+      <h1>Our Work Gallery</h1>
+      <p>Before-and-after transformations, mulch installations, and lawn maintenance showcases from around Kokomo.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Before &amp; After</span>
+      <h2 class="section-title">Lawn Transformations</h2>
+    </div>
+    <div class="gallery-grid">
+      <!-- Gallery items with SVG illustrations -->
+      <div class="gallery-item">
+        <div class="gallery-visual" style="background:linear-gradient(135deg, #c8e6c9, #4CAF50);">
+          <svg width="80" height="80" viewBox="0 0 80 80"><text y="60" font-size="60">🌿</text></svg>
+        </div>
+        <div class="gallery-label">
+          <div class="gallery-tag">Before / After</div>
+          <div>Overgrown Lawn Cleanup</div>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-visual" style="background:linear-gradient(135deg, #a5d6a7, #2E7D32);">
+          <svg width="80" height="80" viewBox="0 0 80 80"><text y="60" font-size="60">✂️</text></svg>
+        </div>
+        <div class="gallery-label">
+          <div class="gallery-tag">Mowing</div>
+          <div>Precision Lawn Mow &amp; Edge</div>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-visual" style="background:linear-gradient(135deg, #8d6e63, #5d4037);">
+          <svg width="80" height="80" viewBox="0 0 80 80"><text y="60" font-size="60">🪨</text></svg>
+        </div>
+        <div class="gallery-label">
+          <div class="gallery-tag">Mulch Install</div>
+          <div>Fresh Mulch — Front Beds</div>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-visual" style="background:linear-gradient(135deg, #e65100, #bf360c);">
+          <svg width="80" height="80" viewBox="0 0 80 80"><text y="60" font-size="60">🍂</text></svg>
+        </div>
+        <div class="gallery-label">
+          <div class="gallery-tag">Leaf Removal</div>
+          <div>Fall Cleanup — Full Property</div>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-visual" style="background:linear-gradient(135deg, #1B5E20, #4CAF50);">
+          <svg width="80" height="80" viewBox="0 0 80 80"><text y="60" font-size="60">🌱</text></svg>
+        </div>
+        <div class="gallery-label">
+          <div class="gallery-tag">Before / After</div>
+          <div>Weed Pulling — Garden Beds</div>
+        </div>
+      </div>
+      <div class="gallery-item">
+        <div class="gallery-visual" style="background:linear-gradient(135deg, #33691e, #558b2f);">
+          <svg width="80" height="80" viewBox="0 0 80 80"><text y="60" font-size="60">🏡</text></svg>
+        </div>
+        <div class="gallery-label">
+          <div class="gallery-tag">Full Service</div>
+          <div>Complete Lawn Maintenance</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--green-pale); border-radius:var(--radius-lg); padding:40px; margin-top:48px; text-align:center; border:1px solid var(--green-light);">
+      <div style="font-size:2rem; margin-bottom:12px;">📸</div>
+      <h3 style="font-family:var(--font-display); font-size:1.4rem; color:var(--green-dark); margin-bottom:10px;">More Photos Coming Soon!</h3>
+      <p style="font-size:0.9rem; color:var(--gray-mid); max-width:480px; margin:0 auto; line-height:1.7;">We're actively adding photos from our latest Kokomo projects. Check back soon — or follow us on social media for real-time updates!</p>
+      <button class="btn btn-primary" style="margin-top:24px;" onclick="showPage('contact')">Request a Quote Today</button>
+    </div>
+  </div>
+</div><!-- /gallery -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ REVIEWS PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-reviews" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / Reviews</div>
+      <h1>Customer Reviews</h1>
+      <p>See what Kokomo homeowners are saying about Morgan Lawn Services.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <!-- Rating Summary -->
+    <div style="background:var(--green-dark); border-radius:var(--radius-lg); padding:48px; text-align:center; color:var(--white); margin-bottom:48px;">
+      <div style="font-size:4rem; line-height:1; font-family:var(--font-display); font-weight:900;">5.0</div>
+      <div style="font-size:2rem; color:#FFC107; margin:8px 0; letter-spacing:4px;">★★★★★</div>
+      <div style="font-size:0.9rem; color:rgba(255,255,255,0.7);">Based on customer reviews · Kokomo, Indiana</div>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Best lawn service I've had in Kokomo. Always on time, great communication, and my yard looks amazing every single time. I couldn't be happier with the results. Highly recommend Morgan Lawn Services to anyone!</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">JT</div>
+          <div>
+            <div class="reviewer-name">James T.</div>
+            <div class="reviewer-location">Kokomo, IN · Weekly Customer</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Finally a lawn company that actually shows up! Fair prices, very professional, and he takes real pride in his work. My yard has never looked better. Also super easy to communicate with — always responds quickly.</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">SR</div>
+          <div>
+            <div class="reviewer-name">Sarah R.</div>
+            <div class="reviewer-location">Kokomo, IN · Bi-Weekly Customer</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Had mulch installed and the yard weeded — came out beautiful. Very affordable, great work, and the communication throughout the whole process was excellent. Will definitely use again and again!</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">DM</div>
+          <div>
+            <div class="reviewer-name">David M.</div>
+            <div class="reviewer-location">Kokomo, IN · Mulch &amp; Weed Pulling</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">We've tried a few other lawn services in the area and nothing compares. Morgan Lawn is reliable, affordable, and they do incredible work. Our neighbors keep asking us who does our lawn!</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">LK</div>
+          <div>
+            <div class="reviewer-name">Linda K.</div>
+            <div class="reviewer-location">Kokomo, IN · Monthly Customer</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">The leaf removal service in the fall was a lifesaver. They cleared the entire property completely — front and back — and it was spotless. Very fair price for a big job. Absolutely hiring them again this fall.</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">BH</div>
+          <div>
+            <div class="reviewer-name">Brad H.</div>
+            <div class="reviewer-location">Howard County, IN · Fall Cleanup</div>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p class="review-text">Hard-working, dependable, and honest. Those are the three words I'd use to describe Morgan Lawn. I've been using them for a full season now and I'm a customer for life. Kokomo is lucky to have this business.</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">MC</div>
+          <div>
+            <div class="reviewer-name">Mike C.</div>
+            <div class="reviewer-location">Kokomo, IN · Season Customer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Reviews Coming -->
+    <div style="background:var(--gray-light); border-radius:var(--radius-lg); padding:40px; margin-top:48px; text-align:center; border:1px solid var(--gray-border);">
+      <div style="font-size:2rem; margin-bottom:12px;">⭐</div>
+      <h3 style="font-family:var(--font-display); font-size:1.4rem; color:var(--charcoal); margin-bottom:10px;">Google Reviews — Coming Soon</h3>
+      <p style="font-size:0.9rem; color:var(--gray-mid); max-width:520px; margin:0 auto; line-height:1.7;">We'll soon be integrated with Google Reviews so you can see real-time reviews from verified Kokomo customers. In the meantime, feel free to reach out directly and we'll connect you with past customers as references.</p>
+      <button class="btn btn-primary" style="margin-top:24px;" onclick="showPage('contact')">Contact Us Today</button>
+    </div>
+  </div>
+</div><!-- /reviews -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ FAQ PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-faq" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / FAQ</div>
+      <h1>Frequently Asked Questions</h1>
+      <p>Everything you need to know about working with Morgan Lawn Services in Kokomo, Indiana.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header section-header-center">
+      <h2 class="section-title">Got Questions? We've Got Answers.</h2>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do you provide free estimates?</div>
+        <div class="faq-a">Yes — always. We will come to your property, assess your lawn, and provide a detailed quote completely free of charge with no obligation. We believe in transparent pricing, so you'll know exactly what you're paying before any work begins.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How often should my lawn be mowed?</div>
+        <div class="faq-a">Most lawns benefit from mowing every 1–2 weeks during the growing season (typically April through October in Indiana). During peak growing periods in spring, weekly mowing keeps your lawn looking sharp. In late fall, bi-weekly or monthly may be sufficient. We'll recommend a schedule based on your specific lawn and grass type.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What areas do you serve?</div>
+        <div class="faq-a">We primarily serve Kokomo and Howard County, Indiana. We also serve surrounding communities including Greentown, Russiaville, Bunker Hill, and nearby areas. Not sure if you're in our service area? Give us a call or send us a message — we're happy to let you know!</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do I need to be home when you come?</div>
+        <div class="faq-a">Nope! Most of our customers aren't home when we service their lawn, and that's completely fine. As long as we have access to your yard (gates unlocked, etc.), we can get the job done. We'll let you know when the job is complete.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What payment methods do you accept?</div>
+        <div class="faq-a">We accept cash, check, Venmo, Cash App, and Zelle for your convenience. Payment is typically due upon completion of service. For recurring customers, we can work out a convenient billing schedule. We'll confirm payment details before your first service.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How do I request a quote?</div>
+        <div class="faq-a">Easy! You can fill out our contact form on the website, call or text us directly, or send us an email. We'll get back to you quickly — usually within a few hours during business hours — to set up your free estimate visit.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What happens if it rains on my scheduled day?</div>
+        <div class="faq-a">We monitor weather closely. If rain prevents us from mowing safely (wet grass can lead to poor cuts and lawn damage), we'll reach out to reschedule at the earliest opportunity — usually within 1–2 days. We'll always communicate promptly so you know what to expect.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Is Morgan Lawn Services insured?</div>
+        <div class="faq-a">We are committed to operating professionally and responsibly. Please contact us directly for current insurance information and documentation. We take the care and protection of your property very seriously.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Can I customize which services I want?</div>
+        <div class="faq-a">Absolutely! We offer individual services or bundled packages. Whether you just need mowing, just need mulch installed, or want a full-service plan that includes mowing, trimming, edging, and seasonal cleanup — we can customize a service plan that fits your property and budget.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do you offer any discounts for recurring customers?</div>
+        <div class="faq-a">We value loyal customers and offer competitive pricing for recurring service agreements. When you sign up for regular weekly or bi-weekly service, we can typically offer better rates than one-off visits. Ask about recurring customer pricing when you request your quote!</div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:48px; background:var(--green-pale); padding:40px; border-radius:var(--radius-lg); border:1px solid var(--green-light);">
+      <h3 style="font-family:var(--font-display); font-size:1.4rem; color:var(--green-dark); margin-bottom:10px;">Still Have a Question?</h3>
+      <p style="font-size:0.9rem; color:var(--gray-mid); margin-bottom:24px;">We're always happy to chat! Reach out and we'll answer any question you have.</p>
+      <button class="btn btn-primary" onclick="showPage('contact')">Contact Us →</button>
+    </div>
+  </div>
+</div><!-- /faq -->
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ CONTACT PAGE ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="page-contact" class="page">
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="breadcrumb"><span onclick="showPage('home')">Home</span> / Contact</div>
+      <h1>Get a Free Quote</h1>
+      <p>Ready to get started? Fill out the form below and we'll get back to you quickly — usually within a few hours.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="contact-grid">
+      <!-- Info Cards -->
+      <div class="contact-info">
+        <div class="contact-info-card">
+          <div class="contact-info-icon">📞</div>
+          <div>
+            <h4>Phone / Text</h4>
+            <p><a href="tel:+17651234567">(765) 123-4567</a><br>
+            <span style="font-size:0.8rem;">Call or text anytime — we respond fast!</span></p>
+          </div>
+        </div>
+        <div class="contact-info-card">
+          <div class="contact-info-icon">📧</div>
+          <div>
+            <h4>Email</h4>
+            <p><a href="mailto:hello@morganlawnservices.com">hello@morganlawnservices.com</a><br>
+            <span style="font-size:0.8rem;">We'll reply within a few hours during business hours.</span></p>
+          </div>
+        </div>
+        <div class="contact-info-card">
+          <div class="contact-info-icon">🕐</div>
+          <div>
+            <h4>Business Hours</h4>
+            <p>
+              Mon – Fri: 7:00 AM – 7:00 PM<br>
+              Saturday: 8:00 AM – 5:00 PM<br>
+              Sunday: By appointment
+            </p>
+          </div>
+        </div>
+        <div class="contact-info-card">
+          <div class="contact-info-icon">📍</div>
+          <div>
+            <h4>Service Area</h4>
+            <p>Kokomo, Indiana &amp; surrounding Howard County communities. Free estimates available throughout our service area.</p>
+          </div>
+        </div>
+        <div class="contact-info-card">
+          <div class="contact-info-icon">📱</div>
+          <div>
+            <h4>Follow Us</h4>
+            <p>Stay up to date with our latest work and seasonal specials.</p>
+            <div class="social-links">
+              <a class="social-link" href="#" title="Facebook">f</a>
+              <a class="social-link" href="#" title="Instagram">ig</a>
+              <a class="social-link" href="#" title="Google">G</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div>
+        <div style="background:var(--white); border-radius:var(--radius-lg); padding:40px; box-shadow:var(--shadow-md); border:1px solid var(--gray-border);">
+          <h3 style="font-family:var(--font-display); font-size:1.5rem; margin-bottom:8px; color:var(--green-dark);">Request a Free Estimate</h3>
+          <p style="font-size:0.875rem; color:var(--gray-mid); margin-bottom:28px;">No pressure, no obligation — just a quick chat about your lawn and what you need.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cf-name">First Name *</label>
+              <input type="text" id="cf-name" placeholder="John" required>
+            </div>
+            <div class="form-group">
+              <label for="cf-last">Last Name *</label>
+              <input type="text" id="cf-last" placeholder="Smith" required>
+            </div>
+            <div class="form-group">
+              <label for="cf-phone">Phone Number *</label>
+              <input type="tel" id="cf-phone" placeholder="(765) 555-0100" required>
+            </div>
+            <div class="form-group">
+              <label for="cf-email">Email Address</label>
+              <input type="email" id="cf-email" placeholder="john@email.com">
+            </div>
+            <div class="form-group full">
+              <label for="cf-address">Property Address *</label>
+              <input type="text" id="cf-address" placeholder="123 Main St, Kokomo, IN 46902" required>
+            </div>
+            <div class="form-group full">
+              <label for="cf-service">Service Needed</label>
+              <select id="cf-service">
+                <option value="">Select a service...</option>
+                <option>Lawn Mowing</option>
+                <option>Weed Eating / String Trimming</option>
+                <option>Mulch Installation</option>
+                <option>Leaf Removal</option>
+                <option>Weed Pulling</option>
+                <option>Multiple Services / Full Maintenance</option>
+                <option>Not Sure — Need a Consultation</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label for="cf-yard">Approximate Yard Size</label>
+              <select id="cf-yard">
+                <option value="">Select yard size...</option>
+                <option>Small (under ¼ acre)</option>
+                <option>Medium (¼ – ½ acre)</option>
+                <option>Large (over ½ acre)</option>
+                <option>Not sure</option>
+              </select>
+            </div>
+            <div class="form-group full">
+              <label for="cf-message">Additional Details</label>
+              <textarea id="cf-message" placeholder="Tell us anything else helpful — gates, special areas, current condition, preferred schedule, etc."></textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:20px; padding:16px;" onclick="submitForm()">
+            🌿 Send My Quote Request
+          </button>
+          <div class="form-success" id="form-success">
+            ✅ Thanks! We received your request and will be in touch very soon — usually within a few hours!
+          </div>
+          <p style="font-size:0.78rem; color:var(--gray-mid); text-align:center; margin-top:16px;">We respect your privacy. Your information is never shared or sold.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /contact -->
+
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" onclick="showPage('home')" style="cursor:pointer;">
+          <svg width="40" height="40" viewBox="0 0 44 44" fill="none"><rect width="44" height="44" rx="10" fill="#2E7D32"/><path d="M8 34 C8 34 9 20 11 14 C11.5 12 12.5 12 13 14 C14 18 14 26 14 34" fill="#4CAF50"/><path d="M14 34 C14 34 15 22 17 16 C17.5 14 18 16 18.5 20 L19 34" fill="#81C784"/><path d="M11 14 L15 21 L19 14" fill="#4CAF50"/><path d="M19 20 L22 12 L25 20" fill="#4CAF50"/><path d="M25 34 C25 34 25.5 22 26 20 C26.5 16 27 14 27.5 16 C29.5 22 30 34 30 34" fill="#81C784"/><path d="M30 34 C30 34 30 26 31 14 C31.5 12 32.5 12 33 14 C35 20 36 34 36 34" fill="#4CAF50"/><path d="M25 14 L29 21 L33 14" fill="#4CAF50"/><rect x="6" y="33" width="32" height="3" rx="1.5" fill="#2E7D32"/><ellipse cx="10" cy="33" rx="3" ry="1.5" fill="#4CAF50"/><ellipse cx="22" cy="33" rx="4" ry="1.5" fill="#4CAF50"/><ellipse cx="34" cy="33" rx="3" ry="1.5" fill="#4CAF50"/></svg>
+          <div class="logo-text">
+            <span class="logo-name" style="color:var(--white);">Morgan Lawn Services</span>
+            <span class="logo-tagline" style="color:rgba(255,255,255,0.5);">Reliable Service. Beautiful Lawns.</span>
+          </div>
+        </a>
+        <p style="margin-top:16px;">Locally owned and operated lawn care in Kokomo, Indiana. Built on reliability, communication, and a genuine love for great-looking lawns.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a onclick="showPage('services')">Lawn Mowing</a></li>
+          <li><a onclick="showPage('services')">Weed Eating &amp; Trimming</a></li>
+          <li><a onclick="showPage('services')">Mulch Installation</a></li>
+          <li><a onclick="showPage('services')">Leaf Removal</a></li>
+          <li><a onclick="showPage('services')">Weed Pulling</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a onclick="showPage('about')">About Us</a></li>
+          <li><a onclick="showPage('gallery')">Gallery</a></li>
+          <li><a onclick="showPage('reviews')">Reviews</a></li>
+          <li><a onclick="showPage('faq')">FAQ</a></li>
+          <li><a onclick="showPage('pricing')">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+17651234567">(765) 123-4567</a></li>
+          <li><a href="mailto:hello@morganlawnservices.com">hello@morganlawnservices.com</a></li>
+          <li><a onclick="showPage('contact')">Get a Free Quote</a></li>
+          <li><a>Kokomo, Indiana</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2025 Morgan Lawn Services · Kokomo, Indiana · All rights reserved</div>
+      <div>Built for <span>Kokomo</span> · <span>Reliable Service. Beautiful Lawns.</span></div>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  // ─── PAGE NAVIGATION ───
+  function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + pageId).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('data-page') === pageId);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── MOBILE MENU ───
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // ─── FAQ ───
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    item.classList.toggle('open');
+  }
+
+  // ─── FORM SUBMIT ───
+  function submitForm() {
+    const name = document.getElementById('cf-name').value.trim();
+    const phone = document.getElementById('cf-phone').value.trim();
+    const address = document.getElementById('cf-address').value.trim();
+    if (!name || !phone || !address) {
+      alert('Please fill in your name, phone number, and address to submit.');
+      return;
+    }
+    document.getElementById('form-success').style.display = 'block';
+    setTimeout(() => document.getElementById('form-success').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+  }
+
+  // ─── NAV SHADOW ON SCROLL ───
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    nav.style.boxShadow = window.scrollY > 10 ? '0 4px 20px rgba(0,0,0,0.1)' : '';
+  });
+</script>
+</body>
+</html>

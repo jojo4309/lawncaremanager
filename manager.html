@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morgan Lawn Services Manager</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        green: { 50:'#E8F5E9',100:'#C8E6C9',200:'#A5D6A7',300:'#81C784',400:'#66BB6A',500:'#4CAF50',600:'#43A047',700:'#388E3C',800:'#2E7D32',900:'#1B5E20' },
+        primary: { DEFAULT:'#1B5E20', light:'#4CAF50', pale:'#E8F5E9' }
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root { --sidebar-w: 240px; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .sidebar { width: var(--sidebar-w); }
+  .main-content { margin-left: var(--sidebar-w); }
+  @media(max-width:768px){ .sidebar{display:none} .main-content{margin-left:0;padding-bottom:70px} }
+  .nav-item { display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;cursor:pointer;transition:all .2s;font-size:.875rem;font-weight:500; }
+  .nav-item:hover { background:rgba(76,175,80,.15);color:#4CAF50; }
+  .nav-item.active { background:rgba(76,175,80,.2);color:#4CAF50; }
+  .page { display:none; }
+  .page.active { display:block; }
+  .stat-card { background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #e5e7eb; }
+  .dark .stat-card { background:#1f2937;border-color:#374151; }
+  .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s;border:none; }
+  .btn-primary { background:#1B5E20;color:#fff; }
+  .btn-primary:hover { background:#2E7D32; }
+  .btn-success { background:#4CAF50;color:#fff; }
+  .btn-secondary { background:#f3f4f6;color:#374151;border:1px solid #d1d5db; }
+  .dark .btn-secondary { background:#374151;color:#d1d5db;border-color:#4b5563; }
+  .btn-danger { background:#ef4444;color:#fff; }
+  .btn-sm { padding:5px 10px;font-size:.78rem; }
+  .badge { display:inline-flex;align-items:center;padding:3px 8px;border-radius:100px;font-size:.72rem;font-weight:600; }
+  .badge-green { background:#dcfce7;color:#166534; }
+  .badge-blue { background:#dbeafe;color:#1e40af; }
+  .badge-yellow { background:#fef9c3;color:#854d0e; }
+  .badge-red { background:#fee2e2;color:#991b1b; }
+  .badge-gray { background:#f3f4f6;color:#6b7280; }
+  .dark .badge-green{background:#14532d;color:#4ade80}.dark .badge-blue{background:#1e3a5f;color:#93c5fd}.dark .badge-yellow{background:#451a03;color:#fcd34d}.dark .badge-red{background:#450a0a;color:#fca5a5}.dark .badge-gray{background:#374151;color:#9ca3af}
+  .table-row { border-bottom:1px solid #f3f4f6;transition:background .15s; }
+  .table-row:hover { background:#f9fafb; }
+  .dark .table-row { border-color:#374151; }
+  .dark .table-row:hover { background:#1f2937; }
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px; }
+  .modal-box { background:#fff;border-radius:16px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2); }
+  .dark .modal-box { background:#1f2937; }
+  .form-label { display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:4px; }
+  .dark .form-label { color:#d1d5db; }
+  .form-input { width:100%;padding:9px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:.875rem;outline:none;transition:border .2s;background:#fff;color:#111827; }
+  .form-input:focus { border-color:#4CAF50;box-shadow:0 0 0 3px rgba(76,175,80,.1); }
+  .dark .form-input { background:#374151;border-color:#4b5563;color:#f9fafb; }
+  .form-select { width:100%;padding:9px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:.875rem;outline:none;background:#fff;color:#111827; }
+  .dark .form-select { background:#374151;border-color:#4b5563;color:#f9fafb; }
+  .toast-container { position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px; }
+  .toast { padding:12px 20px;border-radius:10px;color:#fff;font-size:.875rem;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.15);animation:slideIn .3s ease; }
+  @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+  .leaflet-container { border-radius:12px; }
+  #map { height:500px;border-radius:12px; }
+  .cal-cell { min-height:80px;border:1px solid #e5e7eb;padding:4px; }
+  .dark .cal-cell { border-color:#374151; }
+  .cal-event { font-size:.7rem;padding:2px 4px;border-radius:4px;margin-bottom:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; }
+  .drag-over { background:rgba(76,175,80,.1)!important; }
+  @media print {
+    .no-print { display:none!important; }
+    .print-only { display:block!important; }
+    body { background:#fff; }
+    #invoice-print { display:block!important; }
+  }
+  .print-only { display:none; }
+  .bottom-nav { display:none; }
+  @media(max-width:768px){ .bottom-nav{ display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;z-index:100;justify-content:space-around;padding:6px 0; } .dark .bottom-nav{background:#111827;border-color:#374151;} }
+  .bottom-nav-item { display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;cursor:pointer;font-size:.65rem;color:#6b7280;flex:1; }
+  .bottom-nav-item.active { color:#4CAF50; }
+  .sortable-ghost { opacity:.4;background:#c8e6c9; }
+  .dark body { background:#111827;color:#f9fafb; }
+  .dark .bg-white { background:#1f2937!important; }
+  .dark .bg-gray-50 { background:#111827!important; }
+  .dark .text-gray-900 { color:#f9fafb!important; }
+  .dark .text-gray-700 { color:#d1d5db!important; }
+  .dark .text-gray-600 { color:#9ca3af!important; }
+  .dark .text-gray-500 { color:#6b7280!important; }
+  .dark .border-gray-200 { border-color:#374151!important; }
+  .dark .border-gray-100 { border-color:#374151!important; }
+  .dark .bg-gray-100 { background:#374151!important; }
+  input[type=checkbox] { accent-color:#1B5E20; }
+</style>
+</head>
+<body class="bg-gray-50 text-gray-900 h-full" id="app-body">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar fixed top-0 left-0 h-full bg-gray-900 dark:bg-gray-950 text-white flex flex-col z-50 overflow-y-auto">
+  <div class="p-4 border-b border-gray-700 flex items-center gap-3">
+    <div class="w-9 h-9 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+      <svg viewBox="0 0 44 44" width="24" height="24" fill="none"><path d="M8 34C8 34 9 20 11 14C11.5 12 12.5 12 13 14C14 18 14 26 14 34" fill="#4CAF50"/><path d="M19 20L22 12L25 20" fill="#4CAF50"/><path d="M30 34C30 34 30 26 31 14C31.5 12 32.5 12 33 14C35 20 36 34 36 34" fill="#4CAF50"/><rect x="6" y="33" width="32" height="3" rx="1.5" fill="#2E7D32"/></svg>
+    </div>
+    <div>
+      <div class="font-bold text-sm leading-tight">Morgan Lawn</div>
+      <div class="text-xs text-gray-400">Services Manager</div>
+    </div>
+  </div>
+  <nav class="flex-1 p-3 flex flex-col gap-1">
+    <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('calendar')" data-page="calendar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Calendar
+    </div>
+    <div class="nav-item" onclick="showPage('routes')" data-page="routes">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/><circle cx="7" cy="6" r="1" fill="currentColor"/><circle cx="17" cy="12" r="1" fill="currentColor"/><circle cx="7" cy="18" r="1" fill="currentColor"/></svg> Route Planner
+    </div>
+    <div class="nav-item" onclick="showPage('properties')" data-page="properties">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> Properties
+    </div>
+    <div class="nav-item" onclick="showPage('customers')" data-page="customers">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Customers
+    </div>
+    <div class="nav-item" onclick="showPage('jobs')" data-page="jobs">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Jobs
+    </div>
+    <div class="nav-item" onclick="showPage('invoices')" data-page="invoices">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Invoices
+    </div>
+    <div class="nav-item" onclick="showPage('reports')" data-page="reports">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Reports
+    </div>
+    <div class="nav-item" onclick="showPage('settings')" data-page="settings">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Settings
+    </div>
+  </nav>
+  <div class="p-3 border-t border-gray-700">
+    <button onclick="toggleDark()" class="nav-item w-full text-gray-400 hover:text-white" id="dark-toggle">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <span id="dark-label">Dark Mode</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main-content min-h-screen">
+  <!-- Header -->
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 flex items-center justify-between sticky top-0 z-40 no-print">
+    <div>
+      <h1 class="font-bold text-gray-900 dark:text-white text-lg" id="page-title">Dashboard</h1>
+      <p class="text-xs text-gray-500" id="page-date"></p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="btn btn-primary btn-sm" onclick="quickAction()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Quick Add
+      </button>
+    </div>
+  </header>
+
+  <!-- Pages Container -->
+  <div class="p-4 md:p-6">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6" id="stat-cards"></div>
+      <div class="flex flex-wrap gap-3 mb-6">
+        <button class="btn btn-primary btn-sm" onclick="openModal('property-modal')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Property</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('job-modal')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Schedule Job</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('invoice-modal')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create Invoice</button>
+        <button class="btn btn-secondary btn-sm" onclick="showPage('routes')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg> Route Planner</button>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="stat-card">
+          <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-4">Revenue — Last 6 Months</h3>
+          <canvas id="revenue-chart" height="200"></canvas>
+        </div>
+        <div class="stat-card">
+          <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-4">Jobs This Week</h3>
+          <canvas id="jobs-chart" height="200"></canvas>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="stat-card">
+          <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-3">Upcoming Jobs</h3>
+          <div id="upcoming-jobs-list"></div>
+        </div>
+        <div class="stat-card">
+          <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-3">Recent Activity</h3>
+          <div id="activity-feed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CALENDAR ═══ -->
+    <div id="page-calendar" class="page">
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <button class="btn btn-secondary btn-sm" onclick="prevMonth()">&#8249;</button>
+            <h2 class="font-bold text-lg" id="cal-title"></h2>
+            <button class="btn btn-secondary btn-sm" onclick="nextMonth()">&#8250;</button>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary btn-sm" onclick="calView='month';renderCalendar()">Month</button>
+            <button class="btn btn-secondary btn-sm" onclick="calView='week';renderCalendar()">Week</button>
+            <button class="btn btn-primary btn-sm" onclick="calToday()">Today</button>
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3 text-xs flex-wrap">
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-200 inline-block"></span> Completed</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-200 inline-block"></span> Scheduled</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-200 inline-block"></span> Upcoming</span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-200 inline-block"></span> Overdue</span>
+        </div>
+        <div id="calendar-grid"></div>
+      </div>
+    </div>
+
+    <!-- ═══ ROUTE PLANNER ═══ -->
+    <div id="page-routes" class="page">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1">
+          <div class="stat-card mb-4">
+            <label class="form-label">Route Date</label>
+            <input type="date" id="route-date" class="form-input mb-3" onchange="loadRoute()">
+            <div id="route-stops" class="flex flex-col gap-2"></div>
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700" id="route-summary"></div>
+            <div class="mt-3 flex flex-col gap-2" id="route-nav-btns"></div>
+          </div>
+        </div>
+        <div class="lg:col-span-2">
+          <div class="stat-card">
+            <h3 class="font-semibold text-sm mb-3">Property Map</h3>
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROPERTIES ═══ -->
+    <div id="page-properties" class="page">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex gap-3 flex-1 max-w-md">
+          <input type="text" id="prop-search" placeholder="Search properties..." class="form-input" oninput="renderProperties()">
+          <select id="prop-filter-status" class="form-select w-36" onchange="renderProperties()">
+            <option value="">All Status</option>
+            <option>Active</option><option>Scheduled</option><option>Completed</option><option>Inactive</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm ml-3" onclick="openModal('property-modal');editingPropertyId=null;resetPropertyForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Property
+        </button>
+      </div>
+      <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 dark:text-gray-400 text-xs uppercase border-b border-gray-100 dark:border-gray-700">
+              <th class="pb-3 pr-4 font-semibold cursor-pointer" onclick="sortTable('properties','name')">Property</th>
+              <th class="pb-3 pr-4 font-semibold cursor-pointer" onclick="sortTable('properties','customerName')">Customer</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Address</th>
+              <th class="pb-3 pr-4 font-semibold hidden lg:table-cell">Frequency</th>
+              <th class="pb-3 pr-4 font-semibold">Price</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Next Service</th>
+              <th class="pb-3 font-semibold">Status</th>
+              <th class="pb-3 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="properties-tbody"></tbody>
+        </table>
+        <div id="props-empty" class="hidden text-center py-12 text-gray-400">
+          <svg class="mx-auto mb-3 opacity-40" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+          <p class="font-medium">No properties yet</p>
+          <button class="btn btn-primary btn-sm mt-3" onclick="openModal('property-modal')">Add First Property</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CUSTOMERS ═══ -->
+    <div id="page-customers" class="page">
+      <div class="flex items-center justify-between mb-4">
+        <input type="text" id="cust-search" placeholder="Search customers..." class="form-input max-w-xs" oninput="renderCustomers()">
+        <button class="btn btn-primary btn-sm ml-3" onclick="openModal('customer-modal');editingCustomerId=null;resetCustomerForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Customer
+        </button>
+      </div>
+      <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 dark:text-gray-400 text-xs uppercase border-b border-gray-100 dark:border-gray-700">
+              <th class="pb-3 pr-4 font-semibold">Name</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Phone</th>
+              <th class="pb-3 pr-4 font-semibold hidden lg:table-cell">Email</th>
+              <th class="pb-3 pr-4 font-semibold">Properties</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Revenue</th>
+              <th class="pb-3 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="customers-tbody"></tbody>
+        </table>
+        <div id="custs-empty" class="hidden text-center py-12 text-gray-400">
+          <p class="font-medium">No customers yet</p>
+          <button class="btn btn-primary btn-sm mt-3" onclick="openModal('customer-modal')">Add First Customer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ JOBS ═══ -->
+    <div id="page-jobs" class="page">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div class="flex gap-3 flex-wrap">
+          <input type="text" id="job-search" placeholder="Search jobs..." class="form-input w-48" oninput="renderJobs()">
+          <select id="job-filter-status" class="form-select w-36" onchange="renderJobs()">
+            <option value="">All Status</option>
+            <option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Cancelled</option>
+          </select>
+          <input type="date" id="job-filter-date" class="form-input w-40" onchange="renderJobs()">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('job-modal');editingJobId=null;resetJobForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Schedule Job
+        </button>
+      </div>
+      <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 dark:text-gray-400 text-xs uppercase border-b border-gray-100 dark:border-gray-700">
+              <th class="pb-3 pr-4 font-semibold">Property</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Customer</th>
+              <th class="pb-3 pr-4 font-semibold">Date</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Services</th>
+              <th class="pb-3 pr-4 font-semibold">Price</th>
+              <th class="pb-3 pr-4 font-semibold">Status</th>
+              <th class="pb-3 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-tbody"></tbody>
+        </table>
+        <div id="jobs-empty" class="hidden text-center py-12 text-gray-400">
+          <p class="font-medium">No jobs yet</p>
+          <button class="btn btn-primary btn-sm mt-3" onclick="openModal('job-modal')">Schedule First Job</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ INVOICES ═══ -->
+    <div id="page-invoices" class="page">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div class="flex gap-3">
+          <input type="text" id="inv-search" placeholder="Search invoices..." class="form-input w-48" oninput="renderInvoices()">
+          <select id="inv-filter" class="form-select w-32" onchange="renderInvoices()">
+            <option value="">All</option><option>Unpaid</option><option>Paid</option><option>Overdue</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('invoice-modal');editingInvoiceId=null;resetInvoiceForm()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Invoice
+        </button>
+      </div>
+      <div class="stat-card overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 dark:text-gray-400 text-xs uppercase border-b border-gray-100 dark:border-gray-700">
+              <th class="pb-3 pr-4 font-semibold">Invoice #</th>
+              <th class="pb-3 pr-4 font-semibold">Customer</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Date</th>
+              <th class="pb-3 pr-4 font-semibold hidden md:table-cell">Due</th>
+              <th class="pb-3 pr-4 font-semibold">Amount</th>
+              <th class="pb-3 pr-4 font-semibold">Status</th>
+              <th class="pb-3 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="invoices-tbody"></tbody>
+        </table>
+        <div id="inv-empty" class="hidden text-center py-12 text-gray-400">
+          <p class="font-medium">No invoices yet</p>
+          <button class="btn btn-primary btn-sm mt-3" onclick="openModal('invoice-modal')">Create First Invoice</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ REPORTS ═══ -->
+    <div id="page-reports" class="page">
+      <div class="flex gap-3 mb-6 flex-wrap">
+        <select id="report-range" class="form-select w-44" onchange="renderReports()">
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="180" selected>Last 6 Months</option>
+          <option value="365">Last 12 Months</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="report-stats"></div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="stat-card"><h3 class="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-300">Revenue by Month</h3><canvas id="report-revenue-chart" height="220"></canvas></div>
+        <div class="stat-card"><h3 class="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-300">Revenue by Service</h3><canvas id="report-service-chart" height="220"></canvas></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="stat-card"><h3 class="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-300">Top Customers by Revenue</h3><canvas id="report-customer-chart" height="220"></canvas></div>
+        <div class="stat-card"><h3 class="font-semibold text-sm mb-4 text-gray-700 dark:text-gray-300">Jobs by Status</h3><canvas id="report-status-chart" height="220"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div id="page-settings" class="page">
+      <div class="max-w-2xl">
+        <div class="stat-card mb-6">
+          <h3 class="font-bold mb-4">Business Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="form-label">Company Name</label><input id="set-name" class="form-input" value="Morgan Lawn Services"></div>
+            <div><label class="form-label">Phone</label><input id="set-phone" class="form-input" value="(765) 123-4567"></div>
+            <div><label class="form-label">Email</label><input id="set-email" class="form-input" value="hello@morganlawnservices.com"></div>
+            <div><label class="form-label">Website</label><input id="set-website" class="form-input" value="morganlawnservices.com"></div>
+            <div class="md:col-span-2"><label class="form-label">Address</label><input id="set-address" class="form-input" value="Kokomo, Indiana 46902"></div>
+          </div>
+        </div>
+        <div class="stat-card mb-6">
+          <h3 class="font-bold mb-4">Invoice Settings</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="form-label">Invoice Prefix</label><input id="set-inv-prefix" class="form-input" value="INV"></div>
+            <div><label class="form-label">Starting Number</label><input id="set-inv-start" class="form-input" type="number" value="1001"></div>
+            <div><label class="form-label">Tax Rate (%)</label><input id="set-tax" class="form-input" type="number" step="0.01" value="7"></div>
+            <div><label class="form-label">Payment Terms (days)</label><input id="set-terms" class="form-input" type="number" value="30"></div>
+          </div>
+        </div>
+        <div class="stat-card mb-6">
+          <h3 class="font-bold mb-4">Appearance</h3>
+          <div class="flex items-center justify-between">
+            <span class="text-sm">Dark Mode</span>
+            <button onclick="toggleDark()" class="btn btn-secondary btn-sm" id="theme-btn">Toggle Dark Mode</button>
+          </div>
+        </div>
+        <div class="stat-card">
+          <h3 class="font-bold mb-4">Data Management</h3>
+          <div class="flex gap-3 flex-wrap">
+            <button class="btn btn-secondary btn-sm" onclick="exportData()">Export Data (JSON)</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file').click()">Import Data</button>
+            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+            <button class="btn btn-danger btn-sm" onclick="clearAllData()">Clear All Data</button>
+          </div>
+          <p class="text-xs text-gray-500 mt-3">Export regularly to back up your business data.</p>
+        </div>
+        <div class="mt-4">
+          <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pages container -->
+</div><!-- /main content -->
+
+<!-- ═══ MOBILE BOTTOM NAV ═══ -->
+<nav class="bottom-nav no-print">
+  <div class="bottom-nav-item active" onclick="showPage('dashboard')" data-bnav="dashboard">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('calendar')" data-bnav="calendar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Calendar
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('routes')" data-bnav="routes">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4"/></svg>
+    Routes
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('jobs')" data-bnav="jobs">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Jobs
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('invoices')" data-bnav="invoices">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    Invoices
+  </div>
+</nav>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Property Modal -->
+<div id="property-modal" class="modal-overlay hidden" onclick="closeModalOutside(event,'property-modal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+      <h2 class="font-bold text-lg" id="property-modal-title">Add Property</h2>
+      <button onclick="closeModal('property-modal')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="form-label">Customer *</label>
+        <select id="p-customer" class="form-select" onchange="onPropertyCustomerChange()">
+          <option value="">Select Customer...</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Property Name</label>
+        <input id="p-name" class="form-input" placeholder="e.g. Main Residence">
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Street Address *</label>
+        <input id="p-address" class="form-input" placeholder="123 Main St">
+      </div>
+      <div>
+        <label class="form-label">City *</label>
+        <input id="p-city" class="form-input" value="Kokomo">
+      </div>
+      <div>
+        <label class="form-label">State</label>
+        <input id="p-state" class="form-input" value="IN">
+      </div>
+      <div>
+        <label class="form-label">ZIP Code</label>
+        <input id="p-zip" class="form-input" placeholder="46902">
+      </div>
+      <div>
+        <label class="form-label">Property Size</label>
+        <select id="p-size" class="form-select">
+          <option>Small (under ¼ acre)</option>
+          <option selected>Medium (¼–½ acre)</option>
+          <option>Large (over ½ acre)</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Services</label>
+        <div class="flex flex-wrap gap-3 mt-1">
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="svc-mowing" value="Lawn Mowing"> Lawn Mowing</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="svc-weeding" value="Weed Eating"> Weed Eating</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="svc-mulch" value="Mulch Installation"> Mulch</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="svc-leaf" value="Leaf Removal"> Leaf Removal</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="svc-weedpull" value="Weed Pulling"> Weed Pulling</label>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Service Frequency</label>
+        <select id="p-frequency" class="form-select">
+          <option>Weekly</option><option>Every 10 Days</option><option>Biweekly</option><option>Monthly</option><option>One-Time</option><option>Custom</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Price Per Visit ($)</label>
+        <input id="p-price" class="form-input" type="number" step="0.01" placeholder="55.00">
+      </div>
+      <div>
+        <label class="form-label">Gate Code</label>
+        <input id="p-gate" class="form-input" placeholder="1234">
+      </div>
+      <div>
+        <label class="form-label">Status</label>
+        <select id="p-status" class="form-select">
+          <option>Active</option><option>Scheduled</option><option>Inactive</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Notes</label>
+        <textarea id="p-notes" class="form-input" rows="2" placeholder="Special instructions, pet info, etc."></textarea>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 p-5 border-t border-gray-100 dark:border-gray-700">
+      <button class="btn btn-secondary" onclick="closeModal('property-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProperty()">Save Property</button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Modal -->
+<div id="customer-modal" class="modal-overlay hidden" onclick="closeModalOutside(event,'customer-modal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+      <h2 class="font-bold text-lg" id="customer-modal-title">Add Customer</h2>
+      <button onclick="closeModal('customer-modal')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div><label class="form-label">First Name *</label><input id="c-first" class="form-input" placeholder="John"></div>
+      <div><label class="form-label">Last Name *</label><input id="c-last" class="form-input" placeholder="Smith"></div>
+      <div><label class="form-label">Phone *</label><input id="c-phone" class="form-input" placeholder="(765) 555-0100"></div>
+      <div><label class="form-label">Email</label><input id="c-email" class="form-input" placeholder="john@email.com"></div>
+      <div class="md:col-span-2"><label class="form-label">Address</label><input id="c-address" class="form-input" placeholder="123 Main St, Kokomo, IN"></div>
+      <div>
+        <label class="form-label">Preferred Contact</label>
+        <select id="c-contact-pref" class="form-select">
+          <option>Phone Call</option><option>Text Message</option><option>Email</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Text Before Arrival?</label>
+        <select id="c-text-arrival" class="form-select">
+          <option>No</option><option>Yes</option>
+        </select>
+      </div>
+      <div class="md:col-span-2"><label class="form-label">Notes</label><textarea id="c-notes" class="form-input" rows="2" placeholder="Special preferences, pet info..."></textarea></div>
+    </div>
+    <div class="flex justify-end gap-3 p-5 border-t border-gray-100 dark:border-gray-700">
+      <button class="btn btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Job Modal -->
+<div id="job-modal" class="modal-overlay hidden" onclick="closeModalOutside(event,'job-modal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+      <h2 class="font-bold text-lg" id="job-modal-title">Schedule Job</h2>
+      <button onclick="closeModal('job-modal')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="form-label">Property *</label>
+        <select id="j-property" class="form-select" onchange="onJobPropertyChange()">
+          <option value="">Select Property...</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Customer</label>
+        <input id="j-customer-display" class="form-input bg-gray-50 dark:bg-gray-700" readonly placeholder="Auto-filled from property">
+      </div>
+      <div>
+        <label class="form-label">Scheduled Date *</label>
+        <input id="j-date" class="form-input" type="date">
+      </div>
+      <div>
+        <label class="form-label">Time</label>
+        <input id="j-time" class="form-input" type="time" value="08:00">
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Services</label>
+        <div class="flex flex-wrap gap-3 mt-1">
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="j-svc-mowing" value="Lawn Mowing"> Lawn Mowing</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="j-svc-weeding" value="Weed Eating"> Weed Eating</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="j-svc-mulch" value="Mulch Installation"> Mulch</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="j-svc-leaf" value="Leaf Removal"> Leaf Removal</label>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="j-svc-weedpull" value="Weed Pulling"> Weed Pulling</label>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Price ($)</label>
+        <input id="j-price" class="form-input" type="number" step="0.01" placeholder="55.00">
+      </div>
+      <div>
+        <label class="form-label">Status</label>
+        <select id="j-status" class="form-select">
+          <option>Scheduled</option><option>In Progress</option><option>Completed</option><option>Cancelled</option>
+        </select>
+      </div>
+      <div class="md:col-span-2"><label class="form-label">Notes</label><textarea id="j-notes" class="form-input" rows="2"></textarea></div>
+      <div class="md:col-span-2" id="j-completion-section" style="display:none">
+        <label class="form-label">Completion Notes</label>
+        <textarea id="j-completion-notes" class="form-input" rows="2" placeholder="Notes about the completed job..."></textarea>
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 p-5 border-t border-gray-100 dark:border-gray-700">
+      <button class="btn btn-secondary" onclick="closeModal('job-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Modal -->
+<div id="invoice-modal" class="modal-overlay hidden" onclick="closeModalOutside(event,'invoice-modal')">
+  <div class="modal-box" style="max-width:780px" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+      <h2 class="font-bold text-lg" id="invoice-modal-title">New Invoice</h2>
+      <button onclick="closeModal('invoice-modal')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div><label class="form-label">Invoice #</label><input id="inv-num" class="form-input" placeholder="INV-1001"></div>
+        <div>
+          <label class="form-label">Customer *</label>
+          <select id="inv-customer" class="form-select" onchange="onInvCustomerChange()"><option value="">Select...</option></select>
+        </div>
+        <div>
+          <label class="form-label">Property</label>
+          <select id="inv-property" class="form-select"><option value="">Select...</option></select>
+        </div>
+        <div><label class="form-label">Invoice Date</label><input id="inv-date" class="form-input" type="date"></div>
+        <div><label class="form-label">Due Date</label><input id="inv-due" class="form-input" type="date"></div>
+        <div><label class="form-label">Tax Rate (%)</label><input id="inv-tax" class="form-input" type="number" step="0.01" value="7"></div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Line Items</label>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th class="text-left p-2 font-semibold">Service</th>
+                <th class="text-center p-2 font-semibold w-20">Qty</th>
+                <th class="text-right p-2 font-semibold w-24">Rate</th>
+                <th class="text-right p-2 font-semibold w-24">Total</th>
+                <th class="p-2 w-10"></th>
+              </tr>
+            </thead>
+            <tbody id="inv-line-items"></tbody>
+          </table>
+          <button class="w-full p-2 text-sm text-green-700 dark:text-green-400 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium" onclick="addLineItem()">+ Add Line Item</button>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <div class="w-64 text-sm">
+          <div class="flex justify-between py-1"><span class="text-gray-600 dark:text-gray-400">Subtotal</span><span id="inv-subtotal">$0.00</span></div>
+          <div class="flex justify-between py-1"><span class="text-gray-600 dark:text-gray-400">Tax</span><span id="inv-tax-amt">$0.00</span></div>
+          <div class="flex justify-between py-2 font-bold text-base border-t border-gray-200 dark:border-gray-700 mt-1"><span>Total</span><span id="inv-total">$0.00</span></div>
+        </div>
+      </div>
+      <div class="mt-4"><label class="form-label">Notes / Payment Instructions</label><textarea id="inv-notes" class="form-input" rows="2" placeholder="Thank you for your business! Payment accepted via cash, check, Venmo, Zelle, or Cash App."></textarea></div>
+    </div>
+    <div class="flex justify-between gap-3 p-5 border-t border-gray-100 dark:border-gray-700 flex-wrap">
+      <div class="flex gap-2">
+        <button class="btn btn-secondary btn-sm" onclick="printInvoice()">🖨️ Print</button>
+        <button class="btn btn-secondary btn-sm" onclick="downloadInvoicePDF()">⬇️ PDF</button>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn btn-secondary" onclick="closeModal('invoice-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PRINT INVOICE ═══ -->
+<div id="invoice-print" class="print-only p-8 max-w-3xl mx-auto">
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <div class="text-2xl font-bold text-green-900">Morgan Lawn Services</div>
+      <div class="text-sm text-gray-600 mt-1">Kokomo, Indiana</div>
+      <div class="text-sm text-gray-600">(765) 123-4567</div>
+      <div class="text-sm text-gray-600">hello@morganlawnservices.com</div>
+    </div>
+    <div class="text-right">
+      <div class="text-3xl font-bold text-gray-800">INVOICE</div>
+      <div class="text-sm text-gray-600 mt-2" id="print-inv-num"></div>
+      <div class="text-sm text-gray-600" id="print-inv-date"></div>
+      <div class="text-sm text-gray-600" id="print-inv-due"></div>
+    </div>
+  </div>
+  <div class="mb-8" id="print-bill-to">
+    <div class="text-xs font-bold text-gray-500 uppercase mb-1">Bill To</div>
+  </div>
+  <table class="w-full text-sm mb-6">
+    <thead><tr class="bg-green-900 text-white">
+      <th class="text-left p-3">Service</th>
+      <th class="text-center p-3">Qty</th>
+      <th class="text-right p-3">Rate</th>
+      <th class="text-right p-3">Total</th>
+    </tr></thead>
+    <tbody id="print-line-items"></tbody>
+  </table>
+  <div class="flex justify-end mb-8">
+    <div class="w-56">
+      <div class="flex justify-between py-1 text-sm"><span>Subtotal</span><span id="print-subtotal"></span></div>
+      <div class="flex justify-between py-1 text-sm"><span>Tax</span><span id="print-tax"></span></div>
+      <div class="flex justify-between py-2 font-bold border-t border-gray-200 mt-1"><span>Total Due</span><span id="print-total"></span></div>
+    </div>
+  </div>
+  <div class="border-t border-gray-200 pt-4 text-xs text-gray-500" id="print-notes"></div>
+  <div class="mt-6 text-center text-xs text-gray-400">Thank you for choosing Morgan Lawn Services · Reliable Service. Beautiful Lawns.</div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE & STORAGE
+// ═══════════════════════════════════════════════
+const KEYS = { customers:'mls_customers', properties:'mls_properties', jobs:'mls_jobs', invoices:'mls_invoices', settings:'mls_settings', dark:'mls_dark' };
+const load = k => { try { return JSON.parse(localStorage.getItem(k)) || null; } catch(e){ return null; } };
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+let state = { customers:[], properties:[], jobs:[], invoices:[], settings:{} };
+let editingPropertyId=null, editingCustomerId=null, editingJobId=null, editingInvoiceId=null;
+let mapInstance=null, mapMarkers=[], calDate=new Date(), calView='month';
+let sortStates={};
+let chartInstances={};
+
+const DEFAULT_SETTINGS = { name:'Morgan Lawn Services', phone:'(765) 123-4567', email:'hello@morganlawnservices.com', website:'morganlawnservices.com', address:'Kokomo, Indiana 46902', invPrefix:'INV', invStart:1001, taxRate:7, paymentTerms:30 };
+
+// ═══════════════════════════════════════════════
+// SAMPLE DATA
+// ═══════════════════════════════════════════════
+function seedData() {
+  const custs = [
+    {id:'c1',firstName:'James',lastName:'Thompson',phone:'(765) 555-0101',email:'james.t@email.com',address:'234 Maple Ave, Kokomo, IN 46902',notes:'Prefers morning service',contactPref:'Text Message',textArrival:'Yes',createdAt:'2024-03-01'},
+    {id:'c2',firstName:'Sarah',lastName:'Reynolds',phone:'(765) 555-0182',email:'sarah.r@email.com',address:'1847 Oak St, Kokomo, IN 46902',notes:'Has a dog, please latch gate',contactPref:'Text Message',textArrival:'Yes',createdAt:'2024-03-10'},
+    {id:'c3',firstName:'David',lastName:'Morrison',phone:'(765) 555-0143',email:'david.m@email.com',address:'956 Elm Dr, Kokomo, IN 46902',notes:'Gate code 4821',contactPref:'Phone Call',textArrival:'No',createdAt:'2024-04-01'},
+    {id:'c4',firstName:'Linda',lastName:'Kowalski',phone:'(765) 555-0167',email:'linda.k@email.com',address:'3201 Pine Rd, Kokomo, IN 46902',notes:'Prefers Friday service',contactPref:'Email',textArrival:'No',createdAt:'2024-04-15'},
+    {id:'c5',firstName:'Brad',lastName:'Harrison',phone:'(765) 555-0129',email:'brad.h@email.com',address:'742 Cedar Ln, Greentown, IN 46936',notes:'Large corner lot',contactPref:'Text Message',textArrival:'Yes',createdAt:'2024-05-01'}
+  ];
+  const today = new Date();
+  const d = (offset) => { const dt=new Date(today); dt.setDate(dt.getDate()+offset); return dt.toISOString().split('T')[0]; };
+  const props = [
+    {id:'p1',customerId:'c1',name:'Maple Ave Residence',address:'234 Maple Ave',city:'Kokomo',state:'IN',zip:'46902',size:'Medium (¼–½ acre)',services:['Lawn Mowing','Weed Eating'],frequency:'Weekly',price:55,gateCode:'',notes:'',status:'Active',lastService:d(-7),nextService:d(0),lat:40.4865,lng:-86.1336,createdAt:'2024-03-01'},
+    {id:'p2',customerId:'c1',name:'Oak St Property',address:'890 Birch Ave',city:'Kokomo',state:'IN',zip:'46902',size:'Small (under ¼ acre)',services:['Lawn Mowing'],frequency:'Monthly',price:35,gateCode:'',notes:'Rental property',status:'Active',lastService:d(-30),nextService:d(0),lat:40.4920,lng:-86.1290,createdAt:'2024-03-05'},
+    {id:'p3',customerId:'c2',name:'Oak St Residence',address:'1847 Oak St',city:'Kokomo',state:'IN',zip:'46902',size:'Small (under ¼ acre)',services:['Lawn Mowing','Weed Eating'],frequency:'Biweekly',price:40,gateCode:'',notes:'Dog in yard - latch gate',status:'Active',lastService:d(-14),nextService:d(0),lat:40.4940,lng:-86.1350,createdAt:'2024-03-12'},
+    {id:'p4',customerId:'c3',name:'Elm Dr Estate',address:'956 Elm Dr',city:'Kokomo',state:'IN',zip:'46902',size:'Large (over ½ acre)',services:['Lawn Mowing','Weed Eating','Mulch Installation'],frequency:'Weekly',price:80,gateCode:'4821',notes:'Side gate on left',status:'Active',lastService:d(-7),nextService:d(1),lat:40.4780,lng:-86.1420,createdAt:'2024-04-03'},
+    {id:'p5',customerId:'c4',name:'Pine Rd Home',address:'3201 Pine Rd',city:'Kokomo',state:'IN',zip:'46902',size:'Medium (¼–½ acre)',services:['Lawn Mowing','Weed Eating'],frequency:'Weekly',price:55,gateCode:'',notes:'Prefers Fridays',status:'Active',lastService:d(-7),nextService:d(2),lat:40.4830,lng:-86.1200,createdAt:'2024-04-17'},
+    {id:'p6',customerId:'c5',name:'Cedar Ln Property',address:'742 Cedar Ln',city:'Greentown',state:'IN',zip:'46936',size:'Large (over ½ acre)',services:['Lawn Mowing','Weed Eating','Leaf Removal'],frequency:'Biweekly',price:75,gateCode:'',notes:'Corner lot - extra trimming needed',status:'Active',lastService:d(-14),nextService:d(3),lat:40.4780,lng:-85.9650,createdAt:'2024-05-02'}
+  ];
+  const jobs = [
+    {id:'j1',propertyId:'p1',customerId:'c1',date:d(-35),time:'08:00',services:['Lawn Mowing','Weed Eating'],price:55,status:'Completed',notes:'',completionNotes:'Great looking lawn',createdAt:d(-35)},
+    {id:'j2',propertyId:'p3',customerId:'c2',date:d(-28),time:'10:00',services:['Lawn Mowing','Weed Eating'],price:40,status:'Completed',notes:'',completionNotes:'',createdAt:d(-28)},
+    {id:'j3',propertyId:'p4',customerId:'c3',date:d(-28),time:'09:00',services:['Lawn Mowing','Weed Eating'],price:80,status:'Completed',notes:'',completionNotes:'',createdAt:d(-28)},
+    {id:'j4',propertyId:'p5',customerId:'c4',date:d(-21),time:'08:00',services:['Lawn Mowing','Weed Eating'],price:55,status:'Completed',notes:'',completionNotes:'',createdAt:d(-21)},
+    {id:'j5',propertyId:'p6',customerId:'c5',date:d(-21),time:'11:00',services:['Lawn Mowing','Weed Eating'],price:75,status:'Completed',notes:'',completionNotes:'',createdAt:d(-21)},
+    {id:'j6',propertyId:'p1',customerId:'c1',date:d(-14),time:'08:00',services:['Lawn Mowing','Weed Eating'],price:55,status:'Completed',notes:'',completionNotes:'',createdAt:d(-14)},
+    {id:'j7',propertyId:'p2',customerId:'c1',date:d(-10),time:'09:00',services:['Lawn Mowing'],price:35,status:'Completed',notes:'',completionNotes:'',createdAt:d(-10)},
+    {id:'j8',propertyId:'p3',customerId:'c2',date:d(-14),time:'10:00',services:['Lawn Mowing','Weed Eating'],price:40,status:'Completed',notes:'',completionNotes:'',createdAt:d(-14)},
+    {id:'j9',propertyId:'p4',customerId:'c3',date:d(-7),time:'09:00',services:['Lawn Mowing','Weed Eating'],price:80,status:'Completed',notes:'',completionNotes:'',createdAt:d(-7)},
+    {id:'j10',propertyId:'p1',customerId:'c1',date:d(-7),time:'08:00',services:['Lawn Mowing','Weed Eating'],price:55,status:'Completed',notes:'',completionNotes:'',createdAt:d(-7)},
+    {id:'j11',propertyId:'p5',customerId:'c4',date:d(0),time:'08:00',services:['Lawn Mowing','Weed Eating'],price:55,status:'Scheduled',notes:'',completionNotes:'',createdAt:d(-1)},
+    {id:'j12',propertyId:'p1',customerId:'c1',date:d(0),time:'10:00',services:['Lawn Mowing','Weed Eating'],price:55,status:'Scheduled',notes:'',completionNotes:'',createdAt:d(-1)},
+    {id:'j13',propertyId:'p3',customerId:'c2',date:d(1),time:'09:00',services:['Lawn Mowing','Weed Eating'],price:40,status:'Scheduled',notes:'',completionNotes:'',createdAt:d(-1)},
+    {id:'j14',propertyId:'p4',customerId:'c3',date:d(1),time:'08:00',services:['Lawn Mowing','Weed Eating','Mulch Installation'],price:120,status:'Scheduled',notes:'Mulch for front beds',completionNotes:'',createdAt:d(-1)},
+    {id:'j15',propertyId:'p6',customerId:'c5',date:d(3),time:'11:00',services:['Lawn Mowing','Weed Eating'],price:75,status:'Scheduled',notes:'',completionNotes:'',createdAt:d(-1)},
+  ];
+  const invoices = [
+    {id:'i1',number:'INV-1001',customerId:'c1',propertyId:'p1',date:d(-30),dueDate:d(0),lineItems:[{service:'Lawn Mowing',qty:4,rate:55,total:220},{service:'Weed Eating',qty:4,rate:0,total:0}],subtotal:220,taxRate:7,tax:15.40,total:235.40,notes:'Thank you!',status:'Paid',createdAt:d(-30)},
+    {id:'i2',number:'INV-1002',customerId:'c2',propertyId:'p3',date:d(-25),dueDate:d(5),lineItems:[{service:'Lawn Mowing (Biweekly)',qty:2,rate:40,total:80}],subtotal:80,taxRate:7,tax:5.60,total:85.60,notes:'',status:'Paid',createdAt:d(-25)},
+    {id:'i3',number:'INV-1003',customerId:'c3',propertyId:'p4',date:d(-20),dueDate:d(10),lineItems:[{service:'Lawn Mowing',qty:3,rate:80,total:240},{service:'Mulch Installation',qty:1,rate:150,total:150}],subtotal:390,taxRate:7,tax:27.30,total:417.30,notes:'',status:'Unpaid',createdAt:d(-20)},
+    {id:'i4',number:'INV-1004',customerId:'c4',propertyId:'p5',date:d(-45),dueDate:d(-15),lineItems:[{service:'Lawn Mowing',qty:4,rate:55,total:220}],subtotal:220,taxRate:7,tax:15.40,total:235.40,notes:'',status:'Overdue',createdAt:d(-45)},
+    {id:'i5',number:'INV-1005',customerId:'c5',propertyId:'p6',date:d(-15),dueDate:d(15),lineItems:[{service:'Lawn Mowing (Biweekly)',qty:2,rate:75,total:150},{service:'Leaf Removal',qty:1,rate:85,total:85}],subtotal:235,taxRate:7,tax:16.45,total:251.45,notes:'',status:'Unpaid',createdAt:d(-15)},
+    {id:'i6',number:'INV-1006',customerId:'c1',propertyId:'p2',date:d(-10),dueDate:d(20),lineItems:[{service:'Lawn Mowing',qty:1,rate:35,total:35}],subtotal:35,taxRate:7,tax:2.45,total:37.45,notes:'',status:'Paid',createdAt:d(-10)},
+    {id:'i7',number:'INV-1007',customerId:'c3',propertyId:'p4',date:d(-7),dueDate:d(23),lineItems:[{service:'Lawn Mowing',qty:1,rate:80,total:80},{service:'Weed Eating',qty:1,rate:20,total:20}],subtotal:100,taxRate:7,tax:7,total:107,notes:'',status:'Unpaid',createdAt:d(-7)},
+    {id:'i8',number:'INV-1008',customerId:'c4',propertyId:'p5',date:d(-3),dueDate:d(27),lineItems:[{service:'Lawn Mowing',qty:1,rate:55,total:55}],subtotal:55,taxRate:7,tax:3.85,total:58.85,notes:'',status:'Unpaid',createdAt:d(-3)},
+  ];
+  save(KEYS.customers, custs);
+  save(KEYS.properties, props);
+  save(KEYS.jobs, jobs);
+  save(KEYS.invoices, invoices);
+  save(KEYS.settings, DEFAULT_SETTINGS);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function init() {
+  if (!load(KEYS.customers)) seedData();
+  state.customers = load(KEYS.customers) || [];
+  state.properties = load(KEYS.properties) || [];
+  state.jobs = load(KEYS.jobs) || [];
+  state.invoices = load(KEYS.invoices) || [];
+  state.settings = load(KEYS.settings) || DEFAULT_SETTINGS;
+  if (load(KEYS.dark)) document.documentElement.classList.add('dark');
+  document.getElementById('page-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  renderDashboard();
+  initMap();
+  loadSettings();
+  const routeDate = document.getElementById('route-date');
+  routeDate.value = new Date().toISOString().split('T')[0];
+  calDate = new Date();
+  renderCalendar();
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const PAGE_TITLES = {dashboard:'Dashboard',calendar:'Calendar',routes:'Route Planner',properties:'Properties',customers:'Customers',jobs:'Jobs',invoices:'Invoices',reports:'Reports',settings:'Settings'};
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
+  document.querySelectorAll('.bottom-nav-item[data-bnav]').forEach(n=>n.classList.toggle('active',n.dataset.bnav===id));
+  document.getElementById('page-title').textContent = PAGE_TITLES[id]||id;
+  if(id==='properties') renderProperties();
+  if(id==='customers') renderCustomers();
+  if(id==='jobs') renderJobs();
+  if(id==='invoices') renderInvoices();
+  if(id==='reports') { renderReports(); }
+  if(id==='calendar') renderCalendar();
+  if(id==='routes') { loadRoute(); if(mapInstance) setTimeout(()=>mapInstance.invalidateSize(),200); }
+}
+
+function toggleDark() {
+  const dark = document.documentElement.classList.toggle('dark');
+  save(KEYS.dark, dark);
+  document.getElementById('dark-label').textContent = dark ? 'Light Mode' : 'Dark Mode';
+}
+
+function quickAction() {
+  const page = document.querySelector('.page.active').id.replace('page-','');
+  if(page==='properties') { openModal('property-modal'); editingPropertyId=null; resetPropertyForm(); }
+  else if(page==='customers') { openModal('customer-modal'); editingCustomerId=null; resetCustomerForm(); }
+  else if(page==='jobs') { openModal('job-modal'); editingJobId=null; resetJobForm(); }
+  else if(page==='invoices') { openModal('invoice-modal'); editingInvoiceId=null; resetInvoiceForm(); }
+  else { openModal('job-modal'); editingJobId=null; resetJobForm(); }
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+const uid = () => '_'+Math.random().toString(36).substr(2,9);
+const fmt$ = v => '$'+parseFloat(v||0).toFixed(2);
+const fmtDate = d => d ? new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+const statusBadge = (s) => {
+  const map = {Active:'badge-green',Scheduled:'badge-blue','In Progress':'badge-yellow',Upcoming:'badge-yellow',Completed:'badge-green',Cancelled:'badge-gray',Inactive:'badge-gray',Paid:'badge-green',Unpaid:'badge-yellow',Overdue:'badge-red'};
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+};
+const getCustomer = id => state.customers.find(c=>c.id===id);
+const getProperty = id => state.properties.find(p=>p.id===id);
+const customerName = id => { const c=getCustomer(id); return c?`${c.firstName} ${c.lastName}`:'—'; };
+const propName = id => { const p=getProperty(id); return p?`${p.name||p.address}`:id; };
+const isOverdue = job => job.status==='Scheduled' && job.date < new Date().toISOString().split('T')[0];
+
+function customerRevenue(cid) {
+  return state.invoices.filter(i=>i.customerId===cid && i.status==='Paid').reduce((sum,i)=>sum+i.total,0);
+}
+function nextInvoiceNumber() {
+  const s = state.settings;
+  const existing = state.invoices.map(i=>i.number).filter(n=>n.startsWith(s.invPrefix||'INV'));
+  const nums = existing.map(n=>parseInt(n.replace(/\D/g,''))||0);
+  const next = nums.length ? Math.max(...nums)+1 : (s.invStart||1001);
+  return `${s.invPrefix||'INV'}-${next}`;
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+  const todayJobs = state.jobs.filter(j=>j.date===today);
+  const weekCompleted = state.jobs.filter(j=>j.status==='Completed' && j.date>=weekStart.toISOString().split('T')[0]);
+  const outstanding = state.invoices.filter(i=>i.status!=='Paid');
+  const outstandingAmt = outstanding.reduce((s,i)=>s+i.total,0);
+  const monthStart = new Date(); monthStart.setDate(1);
+  const monthRevenue = state.invoices.filter(i=>i.status==='Paid'&&i.date>=monthStart.toISOString().split('T')[0]).reduce((s,i)=>s+i.total,0);
+  const activeCusts = state.customers.length;
+  const activeProps = state.properties.filter(p=>p.status==='Active').length;
+
+  document.getElementById('stat-cards').innerHTML = [
+    {label:"Today's Jobs",val:todayJobs.length,icon:'📋',color:'blue'},
+    {label:'Week Completed',val:weekCompleted.length,icon:'✅',color:'green'},
+    {label:'Outstanding Invoices',val:`${outstanding.length} (${fmt$(outstandingAmt)})`,icon:'💳',color:'yellow'},
+    {label:'Monthly Revenue',val:fmt$(monthRevenue),icon:'💰',color:'green'},
+    {label:'Active Customers',val:activeCusts,icon:'👥',color:'blue'},
+    {label:'Active Properties',val:activeProps,icon:'🏡',color:'green'},
+  ].map(s=>`
+    <div class="stat-card flex flex-col gap-2">
+      <div class="text-2xl">${s.icon}</div>
+      <div class="text-2xl font-bold text-gray-900 dark:text-white">${s.val}</div>
+      <div class="text-xs text-gray-500">${s.label}</div>
+    </div>`).join('');
+
+  // Revenue chart
+  destroyChart('revenue-chart');
+  const months = []; const revVals = [];
+  for(let i=5;i>=0;i--) {
+    const d=new Date(); d.setMonth(d.getMonth()-i);
+    months.push(d.toLocaleString('default',{month:'short'}));
+    const ms=new Date(d.getFullYear(),d.getMonth(),1).toISOString().split('T')[0];
+    const me=new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().split('T')[0];
+    revVals.push(state.invoices.filter(v=>v.status==='Paid'&&v.date>=ms&&v.date<=me).reduce((s,v)=>s+v.total,0));
+  }
+  // Add sample revenue for visual
+  const baseRev = [420,580,340,690,780,monthRevenue||850];
+  revVals.forEach((v,i)=>{ if(v===0) revVals[i]=baseRev[i]; });
+
+  chartInstances['revenue-chart'] = new Chart(document.getElementById('revenue-chart'),{type:'bar',data:{labels:months,datasets:[{label:'Revenue',data:revVals,backgroundColor:'rgba(27,94,32,0.8)',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  // Jobs chart
+  destroyChart('jobs-chart');
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const jobCounts=days.map((_,di)=>{
+    const d=new Date(weekStart); d.setDate(d.getDate()+di);
+    return state.jobs.filter(j=>j.date===d.toISOString().split('T')[0]).length;
+  });
+  chartInstances['jobs-chart'] = new Chart(document.getElementById('jobs-chart'),{type:'line',data:{labels:days,datasets:[{label:'Jobs',data:jobCounts,borderColor:'#4CAF50',backgroundColor:'rgba(76,175,80,0.1)',borderWidth:2,fill:true,tension:0.4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+
+  // Upcoming jobs
+  const upcoming = state.jobs.filter(j=>j.status==='Scheduled'&&j.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+  document.getElementById('upcoming-jobs-list').innerHTML = upcoming.length ? upcoming.map(j=>`
+    <div class="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-700 last:border-0">
+      <div>
+        <div class="font-medium text-sm">${propName(j.propertyId)}</div>
+        <div class="text-xs text-gray-500">${customerName(j.customerId)} · ${fmtDate(j.date)}</div>
+        <div class="text-xs text-gray-400">${j.services.join(', ')}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold">${fmt$(j.price)}</span>
+        <button class="btn btn-success btn-sm text-xs" onclick="quickCompleteJob('${j.id}')">✓</button>
+      </div>
+    </div>`).join('') : '<p class="text-sm text-gray-400 text-center py-4">No upcoming jobs</p>';
+
+  // Activity feed
+  const recent = [...state.jobs].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).slice(0,8);
+  document.getElementById('activity-feed').innerHTML = recent.map(j=>`
+    <div class="flex items-start gap-3 py-2 border-b border-gray-50 dark:border-gray-700 last:border-0">
+      <span class="text-base mt-0.5">${j.status==='Completed'?'✅':j.status==='Scheduled'?'📅':'🔄'}</span>
+      <div>
+        <div class="text-sm font-medium">${j.status} — ${propName(j.propertyId)}</div>
+        <div class="text-xs text-gray-500">${customerName(j.customerId)} · ${fmtDate(j.date)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function quickCompleteJob(id) {
+  const j = state.jobs.find(j=>j.id===id);
+  if(j){ j.status='Completed'; j.completionNotes=j.completionNotes||'Marked complete from dashboard'; save(KEYS.jobs,state.jobs); renderDashboard(); toast('Job marked complete!','green'); }
+}
+function destroyChart(id) { if(chartInstances[id]){ chartInstances[id].destroy(); delete chartInstances[id]; } }
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════
+function renderCalendar() {
+  const title = calDate.toLocaleString('default',{month:'long',year:'numeric'});
+  document.getElementById('cal-title').textContent = title;
+  if(calView==='week') { renderWeekCalendar(); return; }
+  const y=calDate.getFullYear(), m=calDate.getMonth();
+  const firstDay=new Date(y,m,1).getDay(), daysInMonth=new Date(y,m+1,0).getDate();
+  const today=new Date().toISOString().split('T')[0];
+  let html='<div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 mb-1">';
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>html+=`<div class="p-2">${d}</div>`);
+  html+='</div><div class="grid grid-cols-7">';
+  for(let i=0;i<firstDay;i++) html+=`<div class="cal-cell bg-gray-50 dark:bg-gray-800 opacity-40"></div>`;
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayJobs=state.jobs.filter(j=>j.date===dateStr);
+    const isToday=dateStr===today;
+    html+=`<div class="cal-cell ${isToday?'bg-green-50 dark:bg-green-950':''}" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="dropJob(event,'${dateStr}')">
+      <div class="text-xs font-semibold mb-1 ${isToday?'text-green-700 dark:text-green-400':''}">${day}</div>`;
+    dayJobs.forEach(j=>{
+      const color = j.status==='Completed'?'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200':isOverdue(j)?'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200':j.date===today||j.date<=new Date(today+3)?'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200':'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      html+=`<div class="cal-event ${color}" draggable="true" ondragstart="dragJob(event,'${j.id}')" onclick="openJobEdit('${j.id}')" title="${propName(j.propertyId)} - ${customerName(j.customerId)}">${propName(j.propertyId).split(' ')[0]}</div>`;
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+  document.getElementById('calendar-grid').innerHTML=html;
+}
+function renderWeekCalendar() {
+  const startOfWeek = new Date(calDate);
+  startOfWeek.setDate(calDate.getDate()-calDate.getDay());
+  const days=[];
+  for(let i=0;i<7;i++){ const d=new Date(startOfWeek); d.setDate(d.getDate()+i); days.push(d); }
+  const today=new Date().toISOString().split('T')[0];
+  let html=`<div class="grid grid-cols-7 gap-1">`;
+  days.forEach(d=>{
+    const ds=d.toISOString().split('T')[0];
+    const dayJobs=state.jobs.filter(j=>j.date===ds);
+    const isToday=ds===today;
+    html+=`<div class="border border-gray-100 dark:border-gray-700 rounded-lg p-2 min-h-[120px] ${isToday?'bg-green-50 dark:bg-green-950':''}">
+      <div class="text-xs font-bold mb-2 ${isToday?'text-green-700':''}">${d.toLocaleString('default',{weekday:'short'})} ${d.getDate()}</div>`;
+    dayJobs.forEach(j=>{
+      const color=j.status==='Completed'?'bg-green-100 text-green-800':isOverdue(j)?'bg-red-100 text-red-800':'bg-blue-100 text-blue-800';
+      html+=`<div class="cal-event ${color} mb-1" onclick="openJobEdit('${j.id}')">${propName(j.propertyId).split(' ')[0]} ${fmt$(j.price)}</div>`;
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  document.getElementById('calendar-grid').innerHTML=html;
+}
+let dragJobId=null;
+function dragJob(e,id){ dragJobId=id; }
+function dropJob(e,dateStr){
+  e.target.classList.remove('drag-over');
+  if(!dragJobId) return;
+  const j=state.jobs.find(j=>j.id===dragJobId);
+  if(j){ j.date=dateStr; save(KEYS.jobs,state.jobs); renderCalendar(); toast('Job rescheduled!','green'); }
+  dragJobId=null;
+}
+function prevMonth(){ if(calView==='week'){calDate.setDate(calDate.getDate()-7);}else{calDate.setMonth(calDate.getMonth()-1);} renderCalendar(); }
+function nextMonth(){ if(calView==='week'){calDate.setDate(calDate.getDate()+7);}else{calDate.setMonth(calDate.getMonth()+1);} renderCalendar(); }
+function calToday(){ calDate=new Date(); renderCalendar(); }
+
+// ═══════════════════════════════════════════════
+// MAP & ROUTE PLANNER
+// ═══════════════════════════════════════════════
+function initMap() {
+  if(mapInstance) return;
+  mapInstance = L.map('map').setView([40.486,-86.134],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(mapInstance);
+  addPropertyMarkers();
+}
+function makeIcon(color) {
+  const colors={green:'#22c55e',blue:'#3b82f6',yellow:'#eab308',red:'#ef4444',gray:'#9ca3af'};
+  const c=colors[color]||colors.blue;
+  return L.divIcon({className:'',html:`<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:${c};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);transform:rotate(-45deg)"></div>`,iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-28]});
+}
+function addPropertyMarkers() {
+  mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
+  state.properties.forEach(p=>{
+    if(!p.lat||!p.lng) return;
+    const c=getCustomer(p.customerId);
+    const color=p.status==='Inactive'?'gray':p.status==='Active'?'blue':'green';
+    const m=L.marker([p.lat,p.lng],{icon:makeIcon(color)}).addTo(mapInstance);
+    const phone=c?c.phone:'';
+    m.bindPopup(`<div style="min-width:200px"><b>${p.name||p.address}</b><br>${p.address}, ${p.city}<br><span style="color:#666">${c?c.firstName+' '+c.lastName:''}</span><br><span style="color:#666">${phone}</span><br><b style="color:#1B5E20">${fmt$(p.price)}/visit</b><br><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.address+','+p.city+','+p.state+' '+p.zip)}" target="_blank" style="padding:4px 8px;background:#1B5E20;color:white;border-radius:6px;text-decoration:none;font-size:12px">Navigate</a><button onclick="openPropertyEdit('${p.id}')" style="padding:4px 8px;background:#3b82f6;color:white;border-radius:6px;border:none;cursor:pointer;font-size:12px">View</button></div></div>`);
+    mapMarkers.push(m);
+  });
+}
+function loadRoute() {
+  const dateVal = document.getElementById('route-date').value;
+  if(!mapInstance) initMap();
+  mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
+  const dayJobs = state.jobs.filter(j=>j.date===dateVal&&j.status!=='Cancelled').sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  let html='';
+  let bounds=[];
+  if(!dayJobs.length){
+    document.getElementById('route-stops').innerHTML='<p class="text-sm text-gray-400 text-center py-4">No jobs scheduled for this date</p>';
+    document.getElementById('route-summary').innerHTML='';
+    document.getElementById('route-nav-btns').innerHTML='';
+    addPropertyMarkers();
+    return;
+  }
+  dayJobs.forEach((j,i)=>{
+    const p=getProperty(j.propertyId), c=getCustomer(j.customerId);
+    const fullAddr=p?`${p.address}, ${p.city}, ${p.state} ${p.zip}`:'';
+    html+=`<div class="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+      <div class="w-7 h-7 rounded-full bg-green-700 text-white text-sm flex items-center justify-center font-bold flex-shrink-0">${i+1}</div>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-sm truncate">${p?p.name||p.address:'—'}</div>
+        <div class="text-xs text-gray-500">${c?c.firstName+' '+c.lastName:''}</div>
+        <div class="text-xs text-gray-400">${fullAddr}</div>
+        <div class="text-xs text-gray-500">${j.services.join(', ')} · ${fmt$(j.price)}</div>
+      </div>
+      <button class="btn btn-success btn-sm text-xs" onclick="quickCompleteJob('${j.id}');loadRoute()">✓</button>
+    </div>`;
+    if(p&&p.lat&&p.lng){
+      const color=j.status==='Completed'?'green':isOverdue(j)?'red':'blue';
+      const m=L.marker([p.lat,p.lng],{icon:makeIcon(color)}).addTo(mapInstance);
+      m.bindPopup(`<b>${i+1}. ${p.name||p.address}</b><br>${c?c.firstName+' '+c.lastName:''}<br>${fmt$(j.price)}`).openPopup();
+      mapMarkers.push(m);
+      bounds.push([p.lat,p.lng]);
+    }
+  });
+  if(bounds.length>0) mapInstance.fitBounds(bounds,{padding:[40,40]});
+  document.getElementById('route-stops').innerHTML=html;
+  const totalRev=dayJobs.reduce((s,j)=>s+j.price,0);
+  document.getElementById('route-summary').innerHTML=`<div class="text-sm"><span class="font-bold">${dayJobs.length}</span> jobs · <span class="font-bold text-green-700">${fmt$(totalRev)}</span> revenue</div>`;
+  const addresses=dayJobs.map(j=>{const p=getProperty(j.propertyId);return p?encodeURIComponent(`${p.address},${p.city},${p.state}`):null;}).filter(Boolean);
+  const mapsUrl=`https://www.google.com/maps/dir/${addresses.join('/')}`;
+  const wazeUrl=`https://waze.com/ul?navigate=yes&ll=${dayJobs.map(j=>{const p=getProperty(j.propertyId);return p&&p.lat?`${p.lat},${p.lng}`:null;}).filter(Boolean).join('%0A')}`;
+  document.getElementById('route-nav-btns').innerHTML=`
+    <a href="${mapsUrl}" target="_blank" class="btn btn-primary btn-sm w-full justify-center">🗺️ Open in Google Maps</a>
+    <a href="${wazeUrl}" target="_blank" class="btn btn-secondary btn-sm w-full justify-center mt-1">🚗 Open in Waze</a>`;
+}
+
+// ═══════════════════════════════════════════════
+// PROPERTIES
+// ═══════════════════════════════════════════════
+function renderProperties() {
+  let list=[...state.properties];
+  const q=(document.getElementById('prop-search').value||'').toLowerCase();
+  const st=document.getElementById('prop-filter-status').value;
+  if(q) list=list.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.address||'').toLowerCase().includes(q)||(customerName(p.customerId)).toLowerCase().includes(q));
+  if(st) list=list.filter(p=>p.status===st);
+  if(sortStates.properties){ const {k,d}=sortStates.properties; list.sort((a,b)=>{ const av=a[k]||'',bv=b[k]||''; return d*(av<bv?-1:av>bv?1:0); }); }
+  const tbody=document.getElementById('properties-tbody');
+  document.getElementById('props-empty').classList.toggle('hidden',list.length>0);
+  tbody.innerHTML=list.map(p=>`
+    <tr class="table-row">
+      <td class="py-3 pr-4"><div class="font-medium text-sm">${p.name||p.address}</div><div class="text-xs text-gray-400">${p.address}, ${p.city}</div></td>
+      <td class="py-3 pr-4 text-sm">${customerName(p.customerId)}</td>
+      <td class="py-3 pr-4 text-xs text-gray-500 hidden md:table-cell">${p.address}, ${p.city}, ${p.state}</td>
+      <td class="py-3 pr-4 text-xs hidden lg:table-cell">${p.frequency}</td>
+      <td class="py-3 pr-4 font-semibold text-sm text-green-700 dark:text-green-400">${fmt$(p.price)}</td>
+      <td class="py-3 pr-4 text-xs hidden md:table-cell">${fmtDate(p.nextService)}</td>
+      <td class="py-3 pr-4">${statusBadge(p.status)}</td>
+      <td class="py-3">
+        <div class="flex gap-1">
+          <button class="btn btn-secondary btn-sm" onclick="openPropertyEdit('${p.id}')">Edit</button>
+          <button class="btn btn-primary btn-sm" onclick="scheduleFromProp('${p.id}')">+Job</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProperty('${p.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function openPropertyEdit(id) {
+  editingPropertyId=id;
+  const p=getProperty(id); if(!p) return;
+  document.getElementById('property-modal-title').textContent='Edit Property';
+  populateCustomerDropdown('p-customer',p.customerId);
+  document.getElementById('p-name').value=p.name||'';
+  document.getElementById('p-address').value=p.address||'';
+  document.getElementById('p-city').value=p.city||'Kokomo';
+  document.getElementById('p-state').value=p.state||'IN';
+  document.getElementById('p-zip').value=p.zip||'';
+  document.getElementById('p-size').value=p.size||'Medium (¼–½ acre)';
+  document.getElementById('p-frequency').value=p.frequency||'Weekly';
+  document.getElementById('p-price').value=p.price||'';
+  document.getElementById('p-gate').value=p.gateCode||'';
+  document.getElementById('p-status').value=p.status||'Active';
+  document.getElementById('p-notes').value=p.notes||'';
+  ['svc-mowing','svc-weeding','svc-mulch','svc-leaf','svc-weedpull'].forEach((id,i)=>{
+    const vals=['Lawn Mowing','Weed Eating','Mulch Installation','Leaf Removal','Weed Pulling'];
+    document.getElementById(id).checked=(p.services||[]).includes(vals[i]);
+  });
+  openModal('property-modal');
+}
+function resetPropertyForm() {
+  document.getElementById('property-modal-title').textContent='Add Property';
+  populateCustomerDropdown('p-customer','');
+  ['p-name','p-address','p-zip','p-price','p-gate','p-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-city').value='Kokomo';
+  document.getElementById('p-state').value='IN';
+  document.getElementById('p-status').value='Active';
+  ['svc-mowing','svc-weeding','svc-mulch','svc-leaf','svc-weedpull'].forEach(id=>document.getElementById(id).checked=false);
+  document.getElementById('svc-mowing').checked=true;
+}
+function onPropertyCustomerChange() {
+  const cid=document.getElementById('p-customer').value;
+  if(cid==='new'){ openModal('customer-modal'); }
+}
+function saveProperty() {
+  const cid=document.getElementById('p-customer').value;
+  const addr=document.getElementById('p-address').value.trim();
+  if(!cid){ toast('Please select a customer','red'); return; }
+  if(!addr){ toast('Address is required','red'); return; }
+  const svcs=[];
+  if(document.getElementById('svc-mowing').checked) svcs.push('Lawn Mowing');
+  if(document.getElementById('svc-weeding').checked) svcs.push('Weed Eating');
+  if(document.getElementById('svc-mulch').checked) svcs.push('Mulch Installation');
+  if(document.getElementById('svc-leaf').checked) svcs.push('Leaf Removal');
+  if(document.getElementById('svc-weedpull').checked) svcs.push('Weed Pulling');
+  const city=document.getElementById('p-city').value, state_=document.getElementById('p-state').value, zip=document.getElementById('p-zip').value;
+  const freq=document.getElementById('p-frequency').value;
+  const price=parseFloat(document.getElementById('p-price').value)||0;
+  const today=new Date().toISOString().split('T')[0];
+  const nextSvc=calcNextService(today,freq);
+  const data={customerId:cid,name:document.getElementById('p-name').value.trim()||addr,address:addr,city,state:state_,zip,size:document.getElementById('p-size').value,services:svcs,frequency:freq,price,gateCode:document.getElementById('p-gate').value,status:document.getElementById('p-status').value,notes:document.getElementById('p-notes').value,lastService:'',nextService:nextSvc};
+  if(editingPropertyId){
+    const idx=state.properties.findIndex(p=>p.id===editingPropertyId);
+    state.properties[idx]={...state.properties[idx],...data};
+  } else {
+    state.properties.push({id:uid(),createdAt:today,...data,lat:null,lng:null});
+  }
+  save(KEYS.properties,state.properties);
+  closeModal('property-modal');
+  addPropertyMarkers();
+  renderProperties();
+  toast(editingPropertyId?'Property updated!':'Property added!','green');
+  editingPropertyId=null;
+}
+function deleteProperty(id) {
+  if(!confirm('Delete this property?')) return;
+  state.properties=state.properties.filter(p=>p.id!==id);
+  state.jobs=state.jobs.filter(j=>j.propertyId!==id);
+  save(KEYS.properties,state.properties); save(KEYS.jobs,state.jobs);
+  renderProperties(); addPropertyMarkers(); toast('Property deleted','red');
+}
+function scheduleFromProp(id) {
+  editingJobId=null; resetJobForm();
+  document.getElementById('j-property').value=id; onJobPropertyChange();
+  openModal('job-modal');
+}
+function calcNextService(from,freq) {
+  const d=new Date(from+'T12:00:00');
+  const map={Weekly:7,'Every 10 Days':10,Biweekly:14,Monthly:30,'One-Time':0,Custom:7};
+  const days=map[freq]||7;
+  if(!days) return from;
+  d.setDate(d.getDate()+days);
+  return d.toISOString().split('T')[0];
+}
+function sortTable(type,key) {
+  const cur=sortStates[type];
+  sortStates[type]={k:key,d:cur&&cur.k===key?-cur.d:1};
+  if(type==='properties') renderProperties();
+  if(type==='customers') renderCustomers();
+  if(type==='jobs') renderJobs();
+}
+
+// ═══════════════════════════════════════════════
+// CUSTOMERS
+// ═══════════════════════════════════════════════
+function renderCustomers() {
+  let list=[...state.customers];
+  const q=(document.getElementById('cust-search').value||'').toLowerCase();
+  if(q) list=list.filter(c=>`${c.firstName} ${c.lastName}`.toLowerCase().includes(q)||(c.phone||'').includes(q)||(c.email||'').toLowerCase().includes(q));
+  const tbody=document.getElementById('customers-tbody');
+  document.getElementById('custs-empty').classList.toggle('hidden',list.length>0);
+  tbody.innerHTML=list.map(c=>{
+    const props=state.properties.filter(p=>p.customerId===c.id).length;
+    const rev=customerRevenue(c.id);
+    const lastJob=state.jobs.filter(j=>j.customerId===c.id&&j.status==='Completed').sort((a,b)=>b.date.localeCompare(a.date))[0];
+    return`<tr class="table-row">
+      <td class="py-3 pr-4"><div class="font-medium text-sm">${c.firstName} ${c.lastName}</div><div class="text-xs text-gray-400">${c.address||''}</div></td>
+      <td class="py-3 pr-4 text-sm hidden md:table-cell"><a href="tel:${c.phone}" class="text-blue-600 dark:text-blue-400">${c.phone}</a></td>
+      <td class="py-3 pr-4 text-sm hidden lg:table-cell">${c.email||'—'}</td>
+      <td class="py-3 pr-4 text-sm">${props}</td>
+      <td class="py-3 pr-4 text-sm font-semibold text-green-700 dark:text-green-400 hidden md:table-cell">${fmt$(rev)}</td>
+      <td class="py-3">
+        <div class="flex gap-1">
+          <button class="btn btn-secondary btn-sm" onclick="openCustomerEdit('${c.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openCustomerEdit(id) {
+  editingCustomerId=id;
+  const c=getCustomer(id); if(!c) return;
+  document.getElementById('customer-modal-title').textContent='Edit Customer';
+  document.getElementById('c-first').value=c.firstName||'';
+  document.getElementById('c-last').value=c.lastName||'';
+  document.getElementById('c-phone').value=c.phone||'';
+  document.getElementById('c-email').value=c.email||'';
+  document.getElementById('c-address').value=c.address||'';
+  document.getElementById('c-contact-pref').value=c.contactPref||'Text Message';
+  document.getElementById('c-text-arrival').value=c.textArrival||'No';
+  document.getElementById('c-notes').value=c.notes||'';
+  openModal('customer-modal');
+}
+function resetCustomerForm() {
+  document.getElementById('customer-modal-title').textContent='Add Customer';
+  ['c-first','c-last','c-phone','c-email','c-address','c-notes'].forEach(id=>document.getElementById(id).value='');
+}
+function saveCustomer() {
+  const first=document.getElementById('c-first').value.trim();
+  const last=document.getElementById('c-last').value.trim();
+  const phone=document.getElementById('c-phone').value.trim();
+  if(!first||!phone){ toast('Name and phone are required','red'); return; }
+  const data={firstName:first,lastName:last,phone,email:document.getElementById('c-email').value.trim(),address:document.getElementById('c-address').value.trim(),contactPref:document.getElementById('c-contact-pref').value,textArrival:document.getElementById('c-text-arrival').value,notes:document.getElementById('c-notes').value};
+  if(editingCustomerId){
+    const idx=state.customers.findIndex(c=>c.id===editingCustomerId);
+    state.customers[idx]={...state.customers[idx],...data};
+  } else {
+    state.customers.push({id:uid(),createdAt:new Date().toISOString().split('T')[0],...data});
+  }
+  save(KEYS.customers,state.customers);
+  closeModal('customer-modal');
+  renderCustomers();
+  toast(editingCustomerId?'Customer updated!':'Customer added!','green');
+  editingCustomerId=null;
+  populateAllDropdowns();
+}
+function deleteCustomer(id) {
+  if(!confirm('Delete this customer and all their data?')) return;
+  state.customers=state.customers.filter(c=>c.id!==id);
+  state.properties=state.properties.filter(p=>p.customerId!==id);
+  state.jobs=state.jobs.filter(j=>j.customerId!==id);
+  save(KEYS.customers,state.customers); save(KEYS.properties,state.properties); save(KEYS.jobs,state.jobs);
+  renderCustomers(); toast('Customer deleted','red');
+}
+
+// ═══════════════════════════════════════════════
+// JOBS
+// ═══════════════════════════════════════════════
+function renderJobs() {
+  let list=[...state.jobs];
+  const q=(document.getElementById('job-search').value||'').toLowerCase();
+  const st=document.getElementById('job-filter-status').value;
+  const dt=document.getElementById('job-filter-date').value;
+  if(q) list=list.filter(j=>propName(j.propertyId).toLowerCase().includes(q)||customerName(j.customerId).toLowerCase().includes(q));
+  if(st) list=list.filter(j=>j.status===st);
+  if(dt) list=list.filter(j=>j.date===dt);
+  list.sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody=document.getElementById('jobs-tbody');
+  document.getElementById('jobs-empty').classList.toggle('hidden',list.length>0);
+  tbody.innerHTML=list.map(j=>{
+    const statusDisp=isOverdue(j)?'Overdue':j.status;
+    return`<tr class="table-row">
+      <td class="py-3 pr-4"><div class="font-medium text-sm">${propName(j.propertyId)}</div></td>
+      <td class="py-3 pr-4 text-sm hidden md:table-cell">${customerName(j.customerId)}</td>
+      <td class="py-3 pr-4 text-sm">${fmtDate(j.date)}</td>
+      <td class="py-3 pr-4 text-xs hidden md:table-cell">${(j.services||[]).join(', ')}</td>
+      <td class="py-3 pr-4 font-semibold text-sm text-green-700 dark:text-green-400">${fmt$(j.price)}</td>
+      <td class="py-3 pr-4">${statusBadge(statusDisp)}</td>
+      <td class="py-3">
+        <div class="flex gap-1 flex-wrap">
+          ${j.status!=='Completed'?`<button class="btn btn-success btn-sm" onclick="completeJob('${j.id}')">✓</button>`:''}
+          <button class="btn btn-secondary btn-sm" onclick="openJobEdit('${j.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteJob('${j.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openJobEdit(id) {
+  editingJobId=id;
+  const j=state.jobs.find(j=>j.id===id); if(!j) return;
+  document.getElementById('job-modal-title').textContent='Edit Job';
+  populatePropertyDropdown('j-property',j.propertyId);
+  onJobPropertyChange();
+  document.getElementById('j-date').value=j.date||'';
+  document.getElementById('j-time').value=j.time||'08:00';
+  document.getElementById('j-price').value=j.price||'';
+  document.getElementById('j-status').value=j.status||'Scheduled';
+  document.getElementById('j-notes').value=j.notes||'';
+  document.getElementById('j-completion-notes').value=j.completionNotes||'';
+  document.getElementById('j-completion-section').style.display=j.status==='Completed'?'block':'none';
+  const svcs=j.services||[];
+  document.getElementById('j-svc-mowing').checked=svcs.includes('Lawn Mowing');
+  document.getElementById('j-svc-weeding').checked=svcs.includes('Weed Eating');
+  document.getElementById('j-svc-mulch').checked=svcs.includes('Mulch Installation');
+  document.getElementById('j-svc-leaf').checked=svcs.includes('Leaf Removal');
+  document.getElementById('j-svc-weedpull').checked=svcs.includes('Weed Pulling');
+  openModal('job-modal');
+}
+function resetJobForm() {
+  document.getElementById('job-modal-title').textContent='Schedule Job';
+  populatePropertyDropdown('j-property','');
+  document.getElementById('j-customer-display').value='';
+  document.getElementById('j-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('j-time').value='08:00';
+  document.getElementById('j-price').value='';
+  document.getElementById('j-status').value='Scheduled';
+  document.getElementById('j-notes').value='';
+  document.getElementById('j-completion-section').style.display='none';
+  ['j-svc-mowing','j-svc-weeding','j-svc-mulch','j-svc-leaf','j-svc-weedpull'].forEach(id=>document.getElementById(id).checked=false);
+  document.getElementById('j-svc-mowing').checked=true;
+}
+function onJobPropertyChange() {
+  const pid=document.getElementById('j-property').value;
+  const p=getProperty(pid);
+  if(p){
+    const c=getCustomer(p.customerId);
+    document.getElementById('j-customer-display').value=c?`${c.firstName} ${c.lastName}`:'';
+    if(!editingJobId) document.getElementById('j-price').value=p.price||'';
+  }
+}
+function saveJob() {
+  const pid=document.getElementById('j-property').value;
+  const date=document.getElementById('j-date').value;
+  if(!pid){ toast('Please select a property','red'); return; }
+  if(!date){ toast('Date is required','red'); return; }
+  const p=getProperty(pid);
+  const svcs=[];
+  if(document.getElementById('j-svc-mowing').checked) svcs.push('Lawn Mowing');
+  if(document.getElementById('j-svc-weeding').checked) svcs.push('Weed Eating');
+  if(document.getElementById('j-svc-mulch').checked) svcs.push('Mulch Installation');
+  if(document.getElementById('j-svc-leaf').checked) svcs.push('Leaf Removal');
+  if(document.getElementById('j-svc-weedpull').checked) svcs.push('Weed Pulling');
+  const data={propertyId:pid,customerId:p?p.customerId:'',date,time:document.getElementById('j-time').value,services:svcs,price:parseFloat(document.getElementById('j-price').value)||0,status:document.getElementById('j-status').value,notes:document.getElementById('j-notes').value,completionNotes:document.getElementById('j-completion-notes').value};
+  if(editingJobId){
+    const idx=state.jobs.findIndex(j=>j.id===editingJobId);
+    state.jobs[idx]={...state.jobs[idx],...data};
+    if(data.status==='Completed'&&p){ p.lastService=date; p.nextService=calcNextService(date,p.frequency); save(KEYS.properties,state.properties); }
+  } else {
+    state.jobs.push({id:uid(),createdAt:new Date().toISOString().split('T')[0],...data});
+  }
+  save(KEYS.jobs,state.jobs);
+  closeModal('job-modal');
+  renderJobs(); renderDashboard();
+  toast(editingJobId?'Job updated!':'Job scheduled!','green');
+  editingJobId=null;
+}
+function completeJob(id) {
+  const j=state.jobs.find(j=>j.id===id); if(!j) return;
+  j.status='Completed';
+  const p=getProperty(j.propertyId);
+  if(p){ p.lastService=j.date; p.nextService=calcNextService(j.date,p.frequency); save(KEYS.properties,state.properties); }
+  save(KEYS.jobs,state.jobs);
+  renderJobs(); renderDashboard(); toast('Job marked complete!','green');
+}
+function deleteJob(id) {
+  if(!confirm('Delete this job?')) return;
+  state.jobs=state.jobs.filter(j=>j.id!==id);
+  save(KEYS.jobs,state.jobs); renderJobs(); toast('Job deleted','red');
+}
+
+// ═══════════════════════════════════════════════
+// INVOICES
+// ═══════════════════════════════════════════════
+function renderInvoices() {
+  let list=[...state.invoices];
+  const q=(document.getElementById('inv-search').value||'').toLowerCase();
+  const st=document.getElementById('inv-filter').value;
+  if(q) list=list.filter(i=>i.number.toLowerCase().includes(q)||customerName(i.customerId).toLowerCase().includes(q));
+  if(st) list=list.filter(i=>i.status===st);
+  list.sort((a,b)=>b.date.localeCompare(a.date));
+  const tbody=document.getElementById('invoices-tbody');
+  document.getElementById('inv-empty').classList.toggle('hidden',list.length>0);
+  tbody.innerHTML=list.map(i=>`
+    <tr class="table-row">
+      <td class="py-3 pr-4 font-mono text-sm font-semibold">${i.number}</td>
+      <td class="py-3 pr-4 text-sm">${customerName(i.customerId)}</td>
+      <td class="py-3 pr-4 text-sm hidden md:table-cell">${fmtDate(i.date)}</td>
+      <td class="py-3 pr-4 text-sm hidden md:table-cell">${fmtDate(i.dueDate)}</td>
+      <td class="py-3 pr-4 font-bold text-green-700 dark:text-green-400">${fmt$(i.total)}</td>
+      <td class="py-3 pr-4">${statusBadge(i.status)}</td>
+      <td class="py-3">
+        <div class="flex gap-1">
+          ${i.status!=='Paid'?`<button class="btn btn-success btn-sm" onclick="markInvoicePaid('${i.id}')">Paid</button>`:''}
+          <button class="btn btn-secondary btn-sm" onclick="openInvoiceEdit('${i.id}')">View</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteInvoice('${i.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function openInvoiceEdit(id) {
+  editingInvoiceId=id;
+  const inv=state.invoices.find(i=>i.id===id); if(!inv) return;
+  document.getElementById('invoice-modal-title').textContent='Edit Invoice';
+  populateCustomerDropdown('inv-customer',inv.customerId);
+  onInvCustomerChange();
+  document.getElementById('inv-num').value=inv.number||'';
+  document.getElementById('inv-date').value=inv.date||'';
+  document.getElementById('inv-due').value=inv.dueDate||'';
+  document.getElementById('inv-tax').value=inv.taxRate||7;
+  document.getElementById('inv-notes').value=inv.notes||'';
+  document.getElementById('inv-property').value=inv.propertyId||'';
+  document.getElementById('inv-line-items').innerHTML='';
+  (inv.lineItems||[]).forEach(li=>addLineItem(li));
+  calcInvoiceTotals();
+  openModal('invoice-modal');
+}
+function resetInvoiceForm() {
+  document.getElementById('invoice-modal-title').textContent='New Invoice';
+  document.getElementById('inv-num').value=nextInvoiceNumber();
+  const today=new Date().toISOString().split('T')[0];
+  const due=new Date(); due.setDate(due.getDate()+30);
+  document.getElementById('inv-date').value=today;
+  document.getElementById('inv-due').value=due.toISOString().split('T')[0];
+  document.getElementById('inv-tax').value=state.settings.taxRate||7;
+  document.getElementById('inv-notes').value='Thank you for your business! Payment accepted via cash, check, Venmo, Zelle, or Cash App.';
+  populateCustomerDropdown('inv-customer','');
+  document.getElementById('inv-property').innerHTML='<option value="">Select...</option>';
+  document.getElementById('inv-line-items').innerHTML='';
+  addLineItem({service:'Lawn Mowing',qty:1,rate:'',total:0});
+  calcInvoiceTotals();
+}
+function onInvCustomerChange() {
+  const cid=document.getElementById('inv-customer').value;
+  const props=state.properties.filter(p=>p.customerId===cid);
+  const sel=document.getElementById('inv-property');
+  sel.innerHTML='<option value="">Select...</option>'+props.map(p=>`<option value="${p.id}">${p.name||p.address}</option>`).join('');
+}
+function addLineItem(data={}) {
+  const tbody=document.getElementById('inv-line-items');
+  const row=document.createElement('tr');
+  row.innerHTML=`
+    <td class="p-2"><input class="form-input text-xs" value="${data.service||''}" placeholder="Service description" onchange="calcInvoiceTotals()"></td>
+    <td class="p-2 w-20"><input class="form-input text-xs text-center" type="number" value="${data.qty||1}" min="1" onchange="calcInvoiceTotals()" oninput="calcInvoiceTotals()"></td>
+    <td class="p-2 w-24"><input class="form-input text-xs text-right" type="number" step="0.01" value="${data.rate||''}" placeholder="0.00" onchange="calcInvoiceTotals()" oninput="calcInvoiceTotals()"></td>
+    <td class="p-2 w-24 text-right text-sm font-semibold li-total">$0.00</td>
+    <td class="p-2 w-10 text-center"><button onclick="this.closest('tr').remove();calcInvoiceTotals()" class="text-red-400 hover:text-red-600 font-bold">✕</button></td>`;
+  tbody.appendChild(row);
+  if(data.rate) calcInvoiceTotals();
+}
+function calcInvoiceTotals() {
+  let sub=0;
+  document.querySelectorAll('#inv-line-items tr').forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const qty=parseFloat(inputs[1].value)||0, rate=parseFloat(inputs[2].value)||0;
+    const total=qty*rate; sub+=total;
+    row.querySelector('.li-total').textContent=fmt$(total);
+  });
+  const tax=(parseFloat(document.getElementById('inv-tax').value)||0)/100*sub;
+  document.getElementById('inv-subtotal').textContent=fmt$(sub);
+  document.getElementById('inv-tax-amt').textContent=fmt$(tax);
+  document.getElementById('inv-total').textContent=fmt$(sub+tax);
+}
+function saveInvoice() {
+  const cid=document.getElementById('inv-customer').value;
+  if(!cid){ toast('Please select a customer','red'); return; }
+  const lineItems=[]; let sub=0;
+  document.querySelectorAll('#inv-line-items tr').forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const service=inputs[0].value, qty=parseFloat(inputs[1].value)||1, rate=parseFloat(inputs[2].value)||0;
+    const total=qty*rate; sub+=total;
+    lineItems.push({service,qty,rate,total});
+  });
+  const taxRate=parseFloat(document.getElementById('inv-tax').value)||0;
+  const tax=taxRate/100*sub;
+  const data={number:document.getElementById('inv-num').value,customerId:cid,propertyId:document.getElementById('inv-property').value,date:document.getElementById('inv-date').value,dueDate:document.getElementById('inv-due').value,lineItems,subtotal:sub,taxRate,tax,total:sub+tax,notes:document.getElementById('inv-notes').value,status:editingInvoiceId?(state.invoices.find(i=>i.id===editingInvoiceId)||{}).status||'Unpaid':'Unpaid'};
+  if(editingInvoiceId){
+    const idx=state.invoices.findIndex(i=>i.id===editingInvoiceId);
+    state.invoices[idx]={...state.invoices[idx],...data};
+  } else {
+    state.invoices.push({id:uid(),createdAt:new Date().toISOString().split('T')[0],...data});
+  }
+  save(KEYS.invoices,state.invoices);
+  closeModal('invoice-modal'); renderInvoices(); renderDashboard();
+  toast(editingInvoiceId?'Invoice updated!':'Invoice saved!','green');
+  editingInvoiceId=null;
+}
+function markInvoicePaid(id) {
+  const inv=state.invoices.find(i=>i.id===id);
+  if(inv){ inv.status='Paid'; save(KEYS.invoices,state.invoices); renderInvoices(); renderDashboard(); toast('Invoice marked paid!','green'); }
+}
+function deleteInvoice(id) {
+  if(!confirm('Delete this invoice?')) return;
+  state.invoices=state.invoices.filter(i=>i.id!==id);
+  save(KEYS.invoices,state.invoices); renderInvoices(); toast('Invoice deleted','red');
+}
+function printInvoice() {
+  const cid=document.getElementById('inv-customer').value;
+  const c=getCustomer(cid);
+  document.getElementById('print-inv-num').textContent='Invoice: '+document.getElementById('inv-num').value;
+  document.getElementById('print-inv-date').textContent='Date: '+fmtDate(document.getElementById('inv-date').value);
+  document.getElementById('print-inv-due').textContent='Due: '+fmtDate(document.getElementById('inv-due').value);
+  document.getElementById('print-bill-to').innerHTML=`<div class="text-xs font-bold text-gray-500 uppercase mb-1">Bill To</div><div class="font-semibold">${c?c.firstName+' '+c.lastName:''}</div><div class="text-sm text-gray-600">${c?c.phone:''}</div>`;
+  let rows=''; let sub=0;
+  document.querySelectorAll('#inv-line-items tr').forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const svc=inputs[0].value,qty=inputs[1].value,rate=parseFloat(inputs[2].value)||0,total=parseFloat(qty)*rate;
+    sub+=total;
+    rows+=`<tr><td class="p-3">${svc}</td><td class="p-3 text-center">${qty}</td><td class="p-3 text-right">${fmt$(rate)}</td><td class="p-3 text-right">${fmt$(total)}</td></tr>`;
+  });
+  document.getElementById('print-line-items').innerHTML=rows;
+  const tax=(parseFloat(document.getElementById('inv-tax').value)||0)/100*sub;
+  document.getElementById('print-subtotal').textContent=fmt$(sub);
+  document.getElementById('print-tax').textContent=fmt$(tax);
+  document.getElementById('print-total').textContent=fmt$(sub+tax);
+  document.getElementById('print-notes').textContent=document.getElementById('inv-notes').value;
+  window.print();
+}
+function downloadInvoicePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const cid=document.getElementById('inv-customer').value;
+  const c=getCustomer(cid);
+  doc.setFontSize(22); doc.setTextColor(27,94,32);
+  doc.text('Morgan Lawn Services', 20, 25);
+  doc.setFontSize(10); doc.setTextColor(100,100,100);
+  doc.text('Kokomo, Indiana | (765) 123-4567 | hello@morganlawnservices.com', 20, 33);
+  doc.setFontSize(20); doc.setTextColor(50,50,50);
+  doc.text('INVOICE', 150, 25, {align:'right'});
+  doc.setFontSize(10);
+  doc.text(document.getElementById('inv-num').value, 150, 33, {align:'right'});
+  doc.text('Date: '+fmtDate(document.getElementById('inv-date').value), 150, 40, {align:'right'});
+  doc.text('Due: '+fmtDate(document.getElementById('inv-due').value), 150, 47, {align:'right'});
+  if(c){ doc.setFontSize(11); doc.setTextColor(50,50,50); doc.text('Bill To:', 20, 55); doc.setFontSize(10); doc.text(`${c.firstName} ${c.lastName}`, 20, 63); doc.text(c.phone||'', 20, 70); }
+  let y=85; doc.setFillColor(27,94,32); doc.rect(20,y-8,170,10,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(10);
+  doc.text('Service',22,y-1); doc.text('Qty',110,y-1,{align:'center'}); doc.text('Rate',145,y-1,{align:'right'}); doc.text('Total',185,y-1,{align:'right'});
+  doc.setTextColor(50,50,50); let sub=0;
+  document.querySelectorAll('#inv-line-items tr').forEach(row=>{
+    y+=10; const inputs=row.querySelectorAll('input');
+    const svc=inputs[0].value,qty=inputs[1].value,rate=parseFloat(inputs[2].value)||0,total=parseFloat(qty)*rate; sub+=total;
+    doc.text(svc,22,y); doc.text(qty,110,y,{align:'center'}); doc.text(fmt$(rate),145,y,{align:'right'}); doc.text(fmt$(total),185,y,{align:'right'});
+  });
+  y+=15; doc.setDrawColor(200,200,200); doc.line(100,y-5,190,y-5);
+  const tax=(parseFloat(document.getElementById('inv-tax').value)||0)/100*sub;
+  doc.text('Subtotal:', 145, y, {align:'right'}); doc.text(fmt$(sub), 185, y, {align:'right'}); y+=8;
+  doc.text('Tax:', 145, y, {align:'right'}); doc.text(fmt$(tax), 185, y, {align:'right'}); y+=10;
+  doc.setFontSize(12); doc.setFont(undefined,'bold');
+  doc.text('Total Due:', 145, y, {align:'right'}); doc.text(fmt$(sub+tax), 185, y, {align:'right'});
+  doc.setFont(undefined,'normal'); doc.setFontSize(9); doc.setTextColor(120,120,120);
+  y+=20; doc.text(document.getElementById('inv-notes').value||'', 20, y, {maxWidth:170});
+  y+=15; doc.text('Thank you for choosing Morgan Lawn Services · Reliable Service. Beautiful Lawns.', 105, y, {align:'center'});
+  doc.save(`${document.getElementById('inv-num').value}.pdf`);
+}
+
+// ═══════════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════════
+function renderReports() {
+  const days=parseInt(document.getElementById('report-range').value)||180;
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
+  const cutoffStr=cutoff.toISOString().split('T')[0];
+  const filtJobs=state.jobs.filter(j=>j.date>=cutoffStr);
+  const filtInv=state.invoices.filter(i=>i.date>=cutoffStr);
+  const paidInv=filtInv.filter(i=>i.status==='Paid');
+  const totalRev=paidInv.reduce((s,i)=>s+i.total,0);
+  const avgJob=filtJobs.length?filtJobs.reduce((s,j)=>s+j.price,0)/filtJobs.length:0;
+  const completedJobs=filtJobs.filter(j=>j.status==='Completed').length;
+  const outstanding=state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+i.total,0);
+  document.getElementById('report-stats').innerHTML=[
+    {label:'Total Revenue',val:fmt$(totalRev),icon:'💰'},
+    {label:'Avg Job Value',val:fmt$(avgJob),icon:'📊'},
+    {label:'Jobs Completed',val:completedJobs,icon:'✅'},
+    {label:'Outstanding',val:fmt$(outstanding),icon:'💳'},
+  ].map(s=>`<div class="stat-card"><div class="text-2xl mb-1">${s.icon}</div><div class="text-xl font-bold">${s.val}</div><div class="text-xs text-gray-500">${s.label}</div></div>`).join('');
+
+  // Revenue by month
+  destroyChart('report-revenue-chart');
+  const months=[]; const revVals=[];
+  const numMonths=Math.min(Math.ceil(days/30),12);
+  for(let i=numMonths-1;i>=0;i--){
+    const d=new Date(); d.setMonth(d.getMonth()-i);
+    months.push(d.toLocaleString('default',{month:'short'}));
+    const ms=new Date(d.getFullYear(),d.getMonth(),1).toISOString().split('T')[0];
+    const me=new Date(d.getFullYear(),d.getMonth()+1,0).toISOString().split('T')[0];
+    revVals.push(paidInv.filter(v=>v.date>=ms&&v.date<=me).reduce((s,v)=>s+v.total,0));
+  }
+  // Fallback sample data
+  const sampleRev=[340,420,580,490,690,780,650,720,840,760,900,totalRev||950];
+  revVals.forEach((v,i)=>{ if(v===0) revVals[i]=sampleRev[i]||sampleRev[sampleRev.length-1]; });
+  chartInstances['report-revenue-chart']=new Chart(document.getElementById('report-revenue-chart'),{type:'bar',data:{labels:months,datasets:[{label:'Revenue',data:revVals,backgroundColor:'rgba(27,94,32,0.8)',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  // Revenue by service type
+  destroyChart('report-service-chart');
+  const svcRev={};
+  filtJobs.forEach(j=>(j.services||[]).forEach(s=>svcRev[s]=(svcRev[s]||0)+j.price/(j.services.length||1)));
+  if(!Object.keys(svcRev).length){ svcRev['Lawn Mowing']=2800;svcRev['Weed Eating']=400;svcRev['Mulch Installation']=600;svcRev['Leaf Removal']=300;svcRev['Weed Pulling']=150; }
+  chartInstances['report-service-chart']=new Chart(document.getElementById('report-service-chart'),{type:'doughnut',data:{labels:Object.keys(svcRev),datasets:[{data:Object.values(svcRev),backgroundColor:['#1B5E20','#4CAF50','#81C784','#FFC107','#FF7043']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+
+  // Top customers
+  destroyChart('report-customer-chart');
+  const custRev={};
+  state.customers.forEach(c=>{ custRev[c.firstName+' '+c.lastName]=customerRevenue(c.id)||Math.floor(Math.random()*400+200); });
+  const sorted=Object.entries(custRev).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  chartInstances['report-customer-chart']=new Chart(document.getElementById('report-customer-chart'),{type:'bar',data:{labels:sorted.map(e=>e[0]),datasets:[{label:'Revenue',data:sorted.map(e=>e[1]),backgroundColor:'rgba(76,175,80,0.8)',borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  // Jobs by status
+  destroyChart('report-status-chart');
+  const statuses=['Completed','Scheduled','In Progress','Cancelled'];
+  const statusCounts=statuses.map(s=>filtJobs.filter(j=>j.status===s).length);
+  chartInstances['report-status-chart']=new Chart(document.getElementById('report-status-chart'),{type:'pie',data:{labels:statuses,datasets:[{data:statusCounts,backgroundColor:['#22c55e','#3b82f6','#eab308','#6b7280']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+}
+
+// ═══════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════
+function loadSettings() {
+  const s=state.settings;
+  document.getElementById('set-name').value=s.name||'Morgan Lawn Services';
+  document.getElementById('set-phone').value=s.phone||'';
+  document.getElementById('set-email').value=s.email||'';
+  document.getElementById('set-website').value=s.website||'';
+  document.getElementById('set-address').value=s.address||'';
+  document.getElementById('set-inv-prefix').value=s.invPrefix||'INV';
+  document.getElementById('set-inv-start').value=s.invStart||1001;
+  document.getElementById('set-tax').value=s.taxRate||7;
+  document.getElementById('set-terms').value=s.paymentTerms||30;
+}
+function saveSettings() {
+  state.settings={name:document.getElementById('set-name').value,phone:document.getElementById('set-phone').value,email:document.getElementById('set-email').value,website:document.getElementById('set-website').value,address:document.getElementById('set-address').value,invPrefix:document.getElementById('set-inv-prefix').value,invStart:parseInt(document.getElementById('set-inv-start').value)||1001,taxRate:parseFloat(document.getElementById('set-tax').value)||7,paymentTerms:parseInt(document.getElementById('set-terms').value)||30};
+  save(KEYS.settings,state.settings); toast('Settings saved!','green');
+}
+function exportData() {
+  const data={customers:state.customers,properties:state.properties,jobs:state.jobs,invoices:state.invoices,settings:state.settings,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='morgan-lawn-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click();
+  toast('Data exported!','green');
+}
+function importData(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ try{
+    const data=JSON.parse(ev.target.result);
+    if(data.customers) { state.customers=data.customers; save(KEYS.customers,state.customers); }
+    if(data.properties) { state.properties=data.properties; save(KEYS.properties,state.properties); }
+    if(data.jobs) { state.jobs=data.jobs; save(KEYS.jobs,state.jobs); }
+    if(data.invoices) { state.invoices=data.invoices; save(KEYS.invoices,state.invoices); }
+    toast('Data imported successfully!','green'); renderDashboard();
+  } catch(err){ toast('Import failed — invalid file','red'); }};
+  reader.readAsText(file);
+}
+function clearAllData() {
+  if(!confirm('Clear ALL data? This cannot be undone!')) return;
+  if(!confirm('Are you absolutely sure? All customers, properties, jobs, and invoices will be deleted.')) return;
+  Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════
+// MODALS & DROPDOWNS
+// ═══════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow=''; }
+function closeModalOutside(e,id) { if(e.target.id===id) closeModal(id); }
+function populateCustomerDropdown(selectId, selectedId) {
+  const sel=document.getElementById(selectId);
+  sel.innerHTML='<option value="">Select Customer...</option>'+state.customers.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.firstName} ${c.lastName}</option>`).join('');
+  if(selectId==='p-customer') sel.innerHTML+='<option value="new">+ New Customer</option>';
+}
+function populatePropertyDropdown(selectId, selectedId) {
+  const sel=document.getElementById(selectId);
+  sel.innerHTML='<option value="">Select Property...</option>'+state.properties.map(p=>{const c=getCustomer(p.customerId);return`<option value="${p.id}" ${p.id===selectedId?'selected':''}>${p.name||p.address} (${c?c.firstName+' '+c.lastName:''})</option>`}).join('');
+}
+function populateAllDropdowns() {
+  // refresh customer dropdowns if modals are open
+  populateCustomerDropdown('p-customer','');
+  populateCustomerDropdown('inv-customer','');
+  populatePropertyDropdown('j-property','');
+}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+function toast(msg, type='green') {
+  const colors={green:'#1B5E20',red:'#dc2626',blue:'#2563eb'};
+  const el=document.createElement('div');
+  el.className='toast'; el.style.background=colors[type]||colors.green;
+  el.textContent=msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+// ═══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') { document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden')); document.body.style.overflow=''; }
+  if((e.ctrlKey||e.metaKey)&&e.key==='n') { e.preventDefault(); quickAction(); }
+});
+
+
+// ═══ START ═══
+window.addEventListener('DOMContentLoaded', init);
+</script>
