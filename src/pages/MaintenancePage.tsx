@@ -17,7 +17,7 @@ import type { MaintenanceRecord } from '../types'
 import { format } from 'date-fns'
 
 export function MaintenancePage() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const qc = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState({
@@ -29,32 +29,32 @@ export function MaintenancePage() {
   })
 
   const { data: equipment = [] } = useQuery({
-    queryKey: ['equipment', user?.id],
+    queryKey: ['equipment', profileId],
     queryFn: async () => {
-      const { data } = await supabase.from('equipment').select('id, name').eq('profile_id', user!.id)
+      const { data } = await supabase.from('equipment').select('id, name').eq('profile_id', profileId!)
       return data ?? []
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   const { data: records = [], isLoading } = useQuery({
-    queryKey: ['maintenance', user?.id],
+    queryKey: ['maintenance', profileId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('maintenance_records')
         .select('*, equipment(*)')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .order('scheduled_date', { ascending: true })
       if (error) throw error
       return data as MaintenanceRecord[]
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   const createRecord = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from('maintenance_records').insert({
-        profile_id: user!.id,
+        profile_id: profileId!,
         equipment_id: form.equipment_id || null,
         description: form.description,
         status: 'scheduled',

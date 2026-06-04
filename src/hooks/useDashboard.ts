@@ -5,9 +5,9 @@ import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays } fro
 import type { DashboardStats } from '../types'
 
 export function useDashboard() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   return useQuery({
-    queryKey: ['dashboard', user?.id],
+    queryKey: ['dashboard', profileId],
     queryFn: async (): Promise<DashboardStats> => {
       const now = new Date()
       const today = format(now, 'yyyy-MM-dd')
@@ -18,6 +18,7 @@ export function useDashboard() {
       const weekStart = format(startOfWeek(now), 'yyyy-MM-dd')
       const weekEnd = format(endOfWeek(now), 'yyyy-MM-dd')
       const nextWeek = format(addDays(now, 7), 'yyyy-MM-dd')
+      const pid = profileId!
 
       const [
         { data: thisMonthJobs },
@@ -28,13 +29,13 @@ export function useDashboard() {
         { data: customers },
         { data: upcomingJobs },
       ] = await Promise.all([
-        supabase.from('jobs').select('price').eq('profile_id', user!.id).eq('status', 'completed').gte('completed_date', monthStart).lte('completed_date', monthEnd),
-        supabase.from('jobs').select('price').eq('profile_id', user!.id).eq('status', 'completed').gte('completed_date', lastMonthStart).lte('completed_date', lastMonthEnd),
-        supabase.from('jobs').select('id').eq('profile_id', user!.id).neq('status', 'cancelled').gte('scheduled_date', weekStart).lte('scheduled_date', weekEnd),
-        supabase.from('jobs').select('id').eq('profile_id', user!.id).neq('status', 'cancelled').eq('scheduled_date', today),
-        supabase.from('invoices').select('total, paid_amount').eq('profile_id', user!.id).in('status', ['sent', 'overdue']),
-        supabase.from('customers').select('id').eq('profile_id', user!.id),
-        supabase.from('jobs').select('*, property:properties(*, customer:customers(*))').eq('profile_id', user!.id).neq('status', 'cancelled').neq('status', 'completed').gte('scheduled_date', today).lte('scheduled_date', nextWeek).order('scheduled_date').limit(5),
+        supabase.from('jobs').select('price').eq('profile_id', pid).eq('status', 'completed').gte('completed_date', monthStart).lte('completed_date', monthEnd),
+        supabase.from('jobs').select('price').eq('profile_id', pid).eq('status', 'completed').gte('completed_date', lastMonthStart).lte('completed_date', lastMonthEnd),
+        supabase.from('jobs').select('id').eq('profile_id', pid).neq('status', 'cancelled').gte('scheduled_date', weekStart).lte('scheduled_date', weekEnd),
+        supabase.from('jobs').select('id').eq('profile_id', pid).neq('status', 'cancelled').eq('scheduled_date', today),
+        supabase.from('invoices').select('total, paid_amount').eq('profile_id', pid).in('status', ['sent', 'overdue']),
+        supabase.from('customers').select('id').eq('profile_id', pid),
+        supabase.from('jobs').select('*, property:properties(*, customer:customers(*))').eq('profile_id', pid).neq('status', 'cancelled').neq('status', 'completed').gte('scheduled_date', today).lte('scheduled_date', nextWeek).order('scheduled_date').limit(5),
       ])
 
       return {
@@ -47,7 +48,7 @@ export function useDashboard() {
         upcoming_jobs: upcomingJobs ?? [],
       }
     },
-    enabled: !!user,
+    enabled: !!profileId,
     refetchInterval: 5 * 60 * 1000,
   })
 }

@@ -26,7 +26,7 @@ export function InvoiceFormPage() {
   const { id } = useParams()
   const isEdit = Boolean(id && id !== 'new')
   const navigate = useNavigate()
-  const { user, profile } = useAuth()
+  const { profileId, profile } = useAuth()
 
   const createInvoice = useCreateInvoice()
   const updateInvoice = useUpdateInvoice()
@@ -46,25 +46,25 @@ export function InvoiceFormPage() {
   ])
 
   const { data: customers = [] } = useQuery({
-    queryKey: ['customers-list', user?.id],
+    queryKey: ['customers-list', profileId],
     queryFn: async () => {
       const { data } = await supabase
         .from('customers')
         .select('id, name')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .order('name')
       return data ?? []
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   useEffect(() => {
-    if (!isEdit && user) {
-      supabase.from('invoices').select('id').eq('profile_id', user.id).then(({ data }) => {
+    if (!isEdit && profileId) {
+      supabase.from('invoices').select('id').eq('profile_id', profileId).then(({ data }) => {
         setForm(f => ({ ...f, invoice_number: generateInvoiceNumber(data?.length ?? 0) }))
       })
     }
-  }, [isEdit, user])
+  }, [isEdit, profileId])
 
   useEffect(() => {
     if (existing) {
