@@ -9,6 +9,28 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MorganLawn" />
     <title>Morgan Lawn Services Manager</title>
+    <script>
+      // GitHub Pages SPA redirect handler
+      (function(){
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Handle ?p= from 404.html
+        var search = window.location.search;
+        if (search.slice(1,3) === 'p=') {
+          var decoded = search.slice(3).split('&').map(function(s){
+            return s.replace(/~and~/g, '&');
+          });
+          window.history.replaceState(
+            null, null,
+            window.location.pathname.split('/').slice(0,2).join('/') + '/' +
+            decoded[0] + (decoded[1] ? '?' + decoded[1] : '') + window.location.hash
+          );
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
