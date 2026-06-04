@@ -32,7 +32,7 @@ export function JobFormPage() {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const qc = useQueryClient()
 
   const createJob = useCreateJob()
@@ -60,12 +60,12 @@ export function JobFormPage() {
   const [savingProperty, setSavingProperty] = useState(false)
 
   const { data: customers = [] } = useQuery({
-    queryKey: ['customers-list', user?.id],
+    queryKey: ['customers-list', profileId],
     queryFn: async () => {
-      const { data } = await supabase.from('customers').select('id, name').eq('profile_id', user!.id).order('name')
+      const { data } = await supabase.from('customers').select('id, name').eq('profile_id', profileId!).order('name')
       return data ?? []
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   const { data: properties = [] } = useQuery({
@@ -137,7 +137,7 @@ export function JobFormPage() {
     setSavingProperty(true)
     const { data, error } = await supabase.from('properties').insert({
       customer_id: form.customer_id,
-      profile_id: user!.id,
+      profile_id: profileId!,
       name: propForm.name,
       address: propForm.address,
       city: propForm.city,

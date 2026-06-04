@@ -19,6 +19,7 @@ import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
 import { EstimatesPage } from './pages/EstimatesPage'
 import { MaintenancePage } from './pages/MaintenancePage'
+import { TeamPage } from './pages/TeamPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } }
@@ -92,6 +93,7 @@ export default function App() {
                 <Route path="/equipment" element={<EquipmentPage />} />
                 <Route path="/maintenance" element={<MaintenancePage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/team" element={<TeamPage />} />
                 <Route path="/recurring" element={<SchedulePage />} />
               </Route>
             </Routes>

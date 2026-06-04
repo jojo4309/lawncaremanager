@@ -5,14 +5,14 @@ import { useAuth } from '../context/AuthContext'
 import { format, addDays } from 'date-fns'
 
 export function useJobs(filters?: { date?: string; status?: string }) {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   return useQuery({
-    queryKey: ['jobs', user?.id, filters],
+    queryKey: ['jobs', profileId, filters],
     queryFn: async () => {
       let q = supabase
         .from('jobs')
         .select('*, property:properties(*, customer:customers(*))')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .order('scheduled_date', { ascending: true })
         .order('route_order', { ascending: true })
 
@@ -23,7 +23,7 @@ export function useJobs(filters?: { date?: string; status?: string }) {
       if (error) throw error
       return data as ServiceJob[]
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 }
 
@@ -32,25 +32,22 @@ export function useTodayJobs() {
 }
 
 export function useCreateJob() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (data: Omit<ServiceJob, 'id' | 'profile_id' | 'created_at'>) => {
       // 1. Create the job
       const { data: created, error } = await supabase
         .from('jobs')
-        .insert({ ...data, profile_id: user!.id })
+        .insert({ ...data, profile_id: profileId! })
         .select()
         .single()
       if (error) throw error
 
-      // 2. Auto-create a draft invoice for this job
+      // 2. Auto-create a draft invoice
       try {
-        // Get next invoice number
         const { data: existing } = await supabase
-          .from('invoices')
-          .select('id')
-          .eq('profile_id', user!.id)
+          .from('invoices').select('id').eq('profile_id', profileId!)
         const nextNum = (existing?.length ?? 0) + 1
         const invoiceNumber = `INV-${String(nextNum).padStart(4, '0')}`
 
@@ -60,7 +57,7 @@ export function useCreateJob() {
         const { data: invoice, error: invErr } = await supabase
           .from('invoices')
           .insert({
-            profile_id: user!.id,
+            profile_id: profileId!,
             customer_id: data.customer_id,
             invoice_number: invoiceNumber,
             status: 'draft',
@@ -72,11 +69,9 @@ export function useCreateJob() {
             total: data.price,
             paid_amount: 0,
           })
-          .select()
-          .single()
+          .select().single()
 
         if (!invErr && invoice) {
-          // Add the job as a line item
           await supabase.from('invoice_line_items').insert({
             invoice_id: invoice.id,
             job_id: created.id,
@@ -86,9 +81,7 @@ export function useCreateJob() {
             total: data.price,
           })
         }
-      } catch {
-        // Invoice creation failing should not block the job save
-      }
+      } catch { /* non-fatal */ }
 
       return created
     },
@@ -105,11 +98,7 @@ export function useUpdateJob() {
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<ServiceJob> & { id: string }) => {
       const { data: updated, error } = await supabase
-        .from('jobs')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single()
+        .from('jobs').update(data).eq('id', id).select().single()
       if (error) throw error
       return updated
     },

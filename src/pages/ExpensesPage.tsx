@@ -19,25 +19,25 @@ import { format } from 'date-fns'
 const CATEGORIES: ExpenseCategory[] = ['fuel', 'equipment', 'supplies', 'insurance', 'marketing', 'labor', 'other']
 
 export function ExpensesPage() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const qc = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState({ category: 'fuel' as ExpenseCategory, description: '', amount: '', expense_date: format(new Date(), 'yyyy-MM-dd'), notes: '' })
 
   const { data: expenses = [], isLoading } = useQuery({
-    queryKey: ['expenses', user?.id],
+    queryKey: ['expenses', profileId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('expenses').select('*').eq('profile_id', user!.id).order('expense_date', { ascending: false })
+      const { data, error } = await supabase.from('expenses').select('*').eq('profile_id', profileId!).order('expense_date', { ascending: false })
       if (error) throw error
       return data as Expense[]
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   const createExpense = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from('expenses').insert({
-        profile_id: user!.id,
+        profile_id: profileId!,
         category: form.category,
         description: form.description,
         amount: parseFloat(form.amount),

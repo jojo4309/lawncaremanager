@@ -15,24 +15,24 @@ import type { Equipment } from '../types'
 import { Link } from 'react-router-dom'
 
 export function EquipmentPage() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const qc = useQueryClient()
   const [modalOpen, setModalOpen] = useState(false)
   const [form, setForm] = useState({ name: '', brand: '', model: '', serial_number: '', notes: '' })
 
   const { data: equipment = [], isLoading } = useQuery({
-    queryKey: ['equipment', user?.id],
+    queryKey: ['equipment', profileId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('equipment').select('*').eq('profile_id', user!.id).order('name')
+      const { data, error } = await supabase.from('equipment').select('*').eq('profile_id', profileId!).order('name')
       if (error) throw error
       return data as Equipment[]
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   const createEquipment = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('equipment').insert({ ...form, profile_id: user!.id })
+      const { error } = await supabase.from('equipment').insert({ ...form, profile_id: profileId! })
       if (error) throw error
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['equipment'] }); setModalOpen(false); setForm({ name: '', brand: '', model: '', serial_number: '', notes: '' }) },

@@ -11,11 +11,11 @@ import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns'
 const COLORS = ['#16a34a', '#2563eb', '#d97706', '#dc2626', '#7c3aed']
 
 export function AnalyticsPage() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const [period, setPeriod] = useState<'6m' | '12m'>('6m')
 
   const { data: analytics } = useQuery({
-    queryKey: ['analytics', user?.id, period],
+    queryKey: ['analytics', profileId, period],
     queryFn: async () => {
       const months = period === '6m' ? 6 : 12
       const now = new Date()
@@ -26,7 +26,7 @@ export function AnalyticsPage() {
           return supabase
             .from('jobs')
             .select('price, service_type')
-            .eq('profile_id', user!.id)
+            .eq('profile_id', profileId!)
             .eq('status', 'completed')
             .gte('completed_date', format(startOfMonth(d), 'yyyy-MM-dd'))
             .lte('completed_date', format(endOfMonth(d), 'yyyy-MM-dd'))
@@ -41,7 +41,7 @@ export function AnalyticsPage() {
       const { data: expenseData } = await supabase
         .from('expenses')
         .select('amount, category')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .gte('expense_date', format(subMonths(now, months), 'yyyy-MM-dd'))
 
       const expenseByCategory = (expenseData ?? []).reduce((acc, e) => {
@@ -54,7 +54,7 @@ export function AnalyticsPage() {
       const { data: serviceData } = await supabase
         .from('jobs')
         .select('service_type, price')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .eq('status', 'completed')
         .gte('completed_date', format(subMonths(now, months), 'yyyy-MM-dd'))
 
@@ -67,7 +67,7 @@ export function AnalyticsPage() {
 
       return { monthlyData, expenseChartData, serviceChartData }
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   const totalRevenue = analytics?.monthlyData.reduce((s, m) => s + m.revenue, 0) ?? 0

@@ -4,24 +4,24 @@ import type { Customer } from '../types'
 import { useAuth } from '../context/AuthContext'
 
 export function useCustomers() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   return useQuery({
-    queryKey: ['customers', user?.id],
+    queryKey: ['customers', profileId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .order('name')
       if (error) throw error
       return data as Customer[]
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 }
 
 export function useCustomer(id: string) {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   return useQuery({
     queryKey: ['customers', id],
     queryFn: async () => {
@@ -29,23 +29,23 @@ export function useCustomer(id: string) {
         .from('customers')
         .select('*, properties(*)')
         .eq('id', id)
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .single()
       if (error) throw error
       return data
     },
-    enabled: !!user && !!id,
+    enabled: !!profileId && !!id,
   })
 }
 
 export function useCreateCustomer() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (data: Omit<Customer, 'id' | 'profile_id' | 'created_at' | 'updated_at'>) => {
       const { data: created, error } = await supabase
         .from('customers')
-        .insert({ ...data, profile_id: user!.id })
+        .insert({ ...data, profile_id: profileId! })
         .select()
         .single()
       if (error) throw error
@@ -60,11 +60,7 @@ export function useUpdateCustomer() {
   return useMutation({
     mutationFn: async ({ id, ...data }: Partial<Customer> & { id: string }) => {
       const { data: updated, error } = await supabase
-        .from('customers')
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single()
+        .from('customers').update(data).eq('id', id).select().single()
       if (error) throw error
       return updated
     },

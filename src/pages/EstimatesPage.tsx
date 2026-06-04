@@ -10,20 +10,20 @@ import { FileText } from 'lucide-react'
 import type { Estimate } from '../types'
 
 export function EstimatesPage() {
-  const { user } = useAuth()
+  const { profileId } = useAuth()
 
   const { data: estimates = [], isLoading } = useQuery({
-    queryKey: ['estimates', user?.id],
+    queryKey: ['estimates', profileId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('estimates')
         .select('*, customer:customers(*)')
-        .eq('profile_id', user!.id)
+        .eq('profile_id', profileId!)
         .order('created_at', { ascending: false })
       if (error) throw error
       return data as Estimate[]
     },
-    enabled: !!user,
+    enabled: !!profileId,
   })
 
   return (
