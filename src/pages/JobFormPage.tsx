@@ -14,6 +14,7 @@ import { Modal } from '../components/ui/Modal'
 import type { ServiceFrequency } from '../types'
 import { format } from 'date-fns'
 import { Plus, Home } from 'lucide-react'
+import { geocodeAddress } from '../lib/geocode'
 
 const SERVICE_TYPES = [
   'Mowing', 'Edging', 'Weed Eating', 'Mulching',
@@ -49,7 +50,6 @@ export function JobFormPage() {
     scheduled_time: '',
     price: '',
     notes: '',
-    route_order: '',
   })
 
   // Inline property creation state
@@ -111,8 +111,7 @@ export function JobFormPage() {
         scheduled_time: existingJob.scheduled_time ?? '',
         price: String(existingJob.price ?? ''),
         notes: existingJob.notes ?? '',
-        route_order: String(existingJob.route_order ?? ''),
-      })
+        })
     }
   }, [existingJob])
 
@@ -135,6 +134,7 @@ export function JobFormPage() {
     e.preventDefault()
     if (!form.customer_id) return
     setSavingProperty(true)
+    const coords = await geocodeAddress(propForm.address, propForm.city, propForm.state, propForm.zip)
     const { data, error } = await supabase.from('properties').insert({
       customer_id: form.customer_id,
       profile_id: profileId!,
@@ -145,6 +145,8 @@ export function JobFormPage() {
       zip: propForm.zip || null,
       gate_code: propForm.gate_code || null,
       notes: propForm.notes || null,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
     }).select().single()
     setSavingProperty(false)
     if (!error && data) {
@@ -169,7 +171,6 @@ export function JobFormPage() {
       scheduled_time: form.scheduled_time || undefined,
       price: parseFloat(form.price) || 0,
       notes: form.notes || undefined,
-      route_order: form.route_order ? parseInt(form.route_order) : undefined,
       description: undefined,
       completed_date: undefined,
       duration_minutes: undefined,
@@ -312,7 +313,6 @@ export function JobFormPage() {
             <Input label="Date" type="date" value={form.scheduled_date} onChange={set('scheduled_date')} required />
             <Input label="Time (optional)" type="time" value={form.scheduled_time} onChange={set('scheduled_time')} />
             <Input label="Price ($)" type="number" step="0.01" min="0" value={form.price} onChange={set('price')} placeholder="0.00" required />
-            <Input label="Route Order (optional)" type="number" min="1" value={form.route_order} onChange={set('route_order')} placeholder="e.g. 1, 2, 3…" />
           </CardContent>
         </Card>
 

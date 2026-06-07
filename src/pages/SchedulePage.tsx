@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { format, addDays, subDays, startOfWeek, isSameDay, parseISO } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, CloudRain, Clock, Undo2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, CloudRain, Clock, Undo2, Navigation, CheckCircle2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useJobs, useUpdateJob } from '../hooks/useJobs'
+import { supabase } from '../lib/supabase'
+import { geocodeAddress, sleep } from '../lib/geocode'
+import { optimizeRoute, totalRouteDistance } from '../lib/routeOptimizer'
 import { PageHeader } from '../components/layout/PageHeader'
 import { Card, CardContent } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
@@ -18,9 +21,11 @@ export function SchedulePage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()))
   const [filter, setFilter] = useState('All')
+  const [optimizing, setOptimizing] = useState(false)
+  const [routeResult, setRouteResult] = useState<{ miles: number; geocoded: number } | null>(null)
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const { data: jobs = [], isLoading } = useJobs({ date: dateStr })
+  const { data: jobs = [], isLoading, refetch } = useJobs({ date: dateStr })
   const updateJob = useUpdateJob()
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -28,6 +33,8 @@ export function SchedulePage() {
   const filtered = filter === 'All'
     ? jobs
     : jobs.filter(j => j.service_type?.split(', ').some(s => s === filter))
+
+  const activeJobs = jobs.filter(j => j.status !== 'completed' && j.status !== 'cancelled')
 
   async function markComplete(job: ServiceJob) {
     await updateJob.mutateAsync({
@@ -38,15 +45,62 @@ export function SchedulePage() {
   }
 
   async function rainDelay(job: ServiceJob) {
-    // Move to next day and mark as rain_delay
     const next = format(addDays(parseISO(job.scheduled_date), 1), 'yyyy-MM-dd')
     await updateJob.mutateAsync({ id: job.id, status: 'rain_delay', scheduled_date: next })
   }
 
   async function undoRainDelay(job: ServiceJob) {
-    // Reverse: move back one day and restore scheduled status
     const prev = format(subDays(parseISO(job.scheduled_date), 1), 'yyyy-MM-dd')
     await updateJob.mutateAsync({ id: job.id, status: 'scheduled', scheduled_date: prev })
+  }
+
+  async function handleOptimizeRoute() {
+    if (activeJobs.length < 2) return
+    setOptimizing(true)
+    setRouteResult(null)
+
+    try {
+      // Build list of jobs with their property coords
+      type JobWithCoords = ServiceJob & { lat?: number | null; lng?: number | null }
+      const jobsWithCoords: JobWithCoords[] = activeJobs.map(j => ({
+        ...j,
+        lat: (j as any).property?.lat ?? null,
+        lng: (j as any).property?.lng ?? null,
+      }))
+
+      // Geocode properties that are missing coordinates
+      let geocodedCount = 0
+      for (const job of jobsWithCoords) {
+        if (job.lat == null || job.lng == null) {
+          const prop = (job as any).property
+          if (!prop?.address) continue
+          const coords = await geocodeAddress(prop.address, prop.city, prop.state, prop.zip)
+          if (coords) {
+            job.lat = coords.lat
+            job.lng = coords.lng
+            await supabase.from('properties').update({ lat: coords.lat, lng: coords.lng }).eq('id', prop.id)
+            geocodedCount++
+            await sleep(1100) // Nominatim rate limit: 1 req/sec
+          }
+        }
+      }
+
+      // Run nearest-neighbor TSP
+      const ordered = optimizeRoute(jobsWithCoords)
+
+      // Save route_order to each job
+      await Promise.all(
+        ordered.map((job, i) =>
+          supabase.from('jobs').update({ route_order: i + 1 }).eq('id', job.id)
+        )
+      )
+
+      const miles = totalRouteDistance(ordered)
+      setRouteResult({ miles, geocoded: geocodedCount })
+      refetch()
+    } finally {
+      setOptimizing(false)
+    }
   }
 
   return (
@@ -90,7 +144,7 @@ export function SchedulePage() {
             return (
               <button
                 key={day.toISOString()}
-                onClick={() => setSelectedDate(day)}
+                onClick={() => { setSelectedDate(day); setRouteResult(null) }}
                 className={`flex flex-col items-center py-1.5 rounded-xl transition-colors ${
                   isSelected ? 'bg-green-600 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
@@ -129,9 +183,40 @@ export function SchedulePage() {
       </div>
 
       <div className="px-4 pb-4 space-y-2">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {format(selectedDate, 'EEEE, MMMM d')} · {filtered.length} job{filtered.length !== 1 ? 's' : ''}
-        </p>
+        {/* Date label + optimize button */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {format(selectedDate, 'EEEE, MMMM d')} · {filtered.length} job{filtered.length !== 1 ? 's' : ''}
+          </p>
+          {activeJobs.length >= 2 && (
+            <button
+              onClick={handleOptimizeRoute}
+              disabled={optimizing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors disabled:opacity-60"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              {optimizing ? 'Optimizing…' : 'Optimize Route'}
+            </button>
+          )}
+        </div>
+
+        {/* Route result banner */}
+        {routeResult && (
+          <div className="flex items-center gap-2 px-3 py-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <CheckCircle2 className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Route optimized · ~{routeResult.miles} mi
+              </p>
+              {routeResult.geocoded > 0 && (
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  Located {routeResult.geocoded} new address{routeResult.geocoded !== 1 ? 'es' : ''}
+                </p>
+              )}
+            </div>
+            <button onClick={() => setRouteResult(null)} className="text-blue-400 hover:text-blue-600 text-lg leading-none">×</button>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="space-y-2">
@@ -157,8 +242,8 @@ export function SchedulePage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      {job.route_order && (
-                        <span className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {job.route_order != null && (
+                        <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center flex-shrink-0">
                           {job.route_order}
                         </span>
                       )}
@@ -167,7 +252,7 @@ export function SchedulePage() {
                       </p>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {(job as any).property?.address}
+                      {(job as any).property?.address}{(job as any).property?.city ? `, ${(job as any).property.city}` : ''}
                     </p>
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                       <Badge status={job.status} />
@@ -188,16 +273,14 @@ export function SchedulePage() {
                     </span>
                     <div className="flex gap-1">
                       {job.status === 'rain_delay' ? (
-                        // Rain-delayed: show undo button
                         <button
                           onClick={() => undoRainDelay(job)}
                           className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium hover:bg-blue-200 transition-colors"
-                          title="Undo rain delay — move back to previous day"
+                          title="Undo rain delay"
                         >
                           <Undo2 className="w-3 h-3" />Undo
                         </button>
                       ) : job.status !== 'completed' && job.status !== 'cancelled' ? (
-                        // Scheduled / in_progress: show rain delay + done
                         <button
                           onClick={() => rainDelay(job)}
                           className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 transition-colors"
@@ -226,7 +309,6 @@ export function SchedulePage() {
                   </div>
                 </div>
 
-                {/* Gate code hint */}
                 {(job as any).property?.gate_code && (
                   <div className="mt-2 px-2 py-1 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                     <p className="text-xs text-yellow-800 dark:text-yellow-300">
@@ -235,12 +317,11 @@ export function SchedulePage() {
                   </div>
                 )}
 
-                {/* Rain delay notice */}
                 {job.status === 'rain_delay' && (
                   <div className="mt-2 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center gap-1.5">
                     <CloudRain className="w-3 h-3 text-blue-500 flex-shrink-0" />
                     <p className="text-xs text-blue-700 dark:text-blue-300">
-                      Rain delayed from previous day — tap Undo to move back
+                      Rain delayed — tap Undo to move back
                     </p>
                   </div>
                 )}
